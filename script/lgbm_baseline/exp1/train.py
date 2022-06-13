@@ -21,6 +21,41 @@ def my_booster(random_state=1, n_estimators=1200):
                           num_leaves=95,
                           max_bins=511, random_state=random_state)
 
+def amex_metric(y_true: np.array, y_pred: np.array) -> float:
+
+    # count of positives and negatives
+    n_pos = y_true.sum()
+    n_neg = y_true.shape[0] - n_pos
+
+    # sorting by descring prediction values
+    indices = np.argsort(y_pred)[::-1]
+    preds, target = y_pred[indices], y_true[indices]
+
+    # filter the top 4% by cumulative row weights
+    weight = 20.0 - target * 19.0
+    cum_norm_weight = (weight / weight.sum()).cumsum()
+    four_pct_filter = cum_norm_weight <= 0.04
+
+    # default rate captured at 4%
+    d = target[four_pct_filter].sum() / n_pos
+
+    # weighted gini coefficient
+    lorentz = (target / n_pos).cumsum()
+    gini = ((lorentz - cum_norm_weight) * weight).sum()
+
+    # max weighted gini coefficient
+    gini_max = 10 * n_neg * (1 - 19 / (n_pos + 20 * n_neg))
+
+    # normalized weighted gini coefficient
+    g = gini / gini_max
+
+    return 0.5 * (g + d)
+
+def custom_accuracy(preds, data):
+    y_true = data.get_label()
+    acc = amex_metric(y_true, preds)
+    return ('custom_accuracy', acc, True)
+
 def create_train(CFG):
     df = pd.read_feather(f'../../../data/raw/train_data.ftr')
     cid = pd.Categorical(df.pop('customer_ID'), ordered=True)
@@ -56,49 +91,15 @@ def create_train(CFG):
 
     return train, target, features
 
-def training(train, target, features, CFG):
+def tuning(train, target, features, CFG):
 
     def objective(trial):
         score_list = []
         kf = StratifiedKFold(n_splits=5)
 
-        def custom_accuracy(preds, data):
-            y_true = data.get_label()
-            acc = amex_metric(y_true, preds)
-            return ('custom_accuracy', acc, True)
-
-        def amex_metric(y_true: np.array, y_pred: np.array) -> float:
-
-            # count of positives and negatives
-            n_pos = y_true.sum()
-            n_neg = y_true.shape[0] - n_pos
-
-            # sorting by descring prediction values
-            indices = np.argsort(y_pred)[::-1]
-            preds, target = y_pred[indices], y_true[indices]
-
-            # filter the top 4% by cumulative row weights
-            weight = 20.0 - target * 19.0
-            cum_norm_weight = (weight / weight.sum()).cumsum()
-            four_pct_filter = cum_norm_weight <= 0.04
-
-            # default rate captured at 4%
-            d = target[four_pct_filter].sum() / n_pos
-
-            # weighted gini coefficient
-            lorentz = (target / n_pos).cumsum()
-            gini = ((lorentz - cum_norm_weight) * weight).sum()
-
-            # max weighted gini coefficient
-            gini_max = 10 * n_neg * (1 - 19 / (n_pos + 20 * n_neg))
-
-            # normalized weighted gini coefficient
-            g = gini / gini_max
-
-            return 0.5 * (g + d)
-
         start_time = datetime.datetime.now()
         for fold, (idx_tr, idx_va) in enumerate(kf.split(train, target)):
+            print('[ Trial Start ]')
             train_x = train.iloc[idx_tr][features]
             valid_x = train.iloc[idx_va][features]
             train_y = target[idx_tr]
@@ -138,20 +139,44 @@ def training(train, target, features, CFG):
         return cv_score
 
     study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=50)
 
+    return study.best_params
 
-#file = CFG['logdir'] + f'/model_fold{fold}.pkl'
-#pickle.dump(model, open(file, 'wb'))
-#print(f"{Fore.GREEN}{Style.BRIGHT}OOF Score: {np.mean(score_list):.5f}{Style.RESET_ALL}")
+def train_model(train, target, features, best_param, CFG):
+    score_list = []
+    kf = StratifiedKFold(n_splits=5)
+    for fold, (idx_tr, idx_va) in enumerate(kf.split(train, target)):
+        train_x = train.iloc[idx_tr][features]
+        valid_x = train.iloc[idx_va][features]
+        train_y = target[idx_tr]
+        valid_y = target[idx_va]
+        
+        dtrain = lgb.Dataset(train_x, label=train_y)
+        dvalid = lgb.Dataset(valid_x, label=valid_y)
+
+        gbm = lgb.train(best_param, dtrain, valid_sets=[dvalid], 
+                        num_boost_round=250,
+                        early_stopping_rounds=15,
+                        callbacks=[lgb.log_evaluation(10)],
+                        feval = [custom_accuracy])
+
+        preds = gbm.predict(valid_x)
+        score = amex_metric(valid_y, preds)
+        score_list.append(score)
+        file = CFG['logdir'] + f'/model_fold{fold}.pkl'
+        pickle.dump(gbm, open(file, 'wb'))
+
+    print(f"{Fore.GREEN}{Style.BRIGHT}OOF Score: {np.mean(score_list):.5f}{Style.RESET_ALL}")
 
 def main():
     with open('config.yml', 'r') as yml:
         CFG = yaml.load(yml, Loader=yaml.SafeLoader)
-
     os.makedirs(CFG['logdir'], exist_ok=True)
     train, target, features = create_train(CFG)
-    training(train, target, features, CFG)
+    best_params = tuning(train, target, features, CFG)
+    best_params['force_col_wise'] = True
+    train_model(train, target, features, best_params, CFG)
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,6 @@
 logdir : out
 
-ONLY_FIRST_FOLD : False
+ONLY_FIRST_FOLD : True
 
 features_avg : [
 'B_1', 'B_11', 'B_16', 'B_17', 'B_18', 'B_2', 'B_20',
