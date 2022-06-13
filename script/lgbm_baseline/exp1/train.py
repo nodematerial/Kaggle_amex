@@ -14,13 +14,6 @@ import optuna
 
 warnings.filterwarnings('ignore')
 
-def my_booster(random_state=1, n_estimators=1200):
-    return lgb.LGBMClassifier(n_estimators=n_estimators,
-                          learning_rate=0.03, reg_lambda=50,
-                          min_child_samples=2400,
-                          num_leaves=95,
-                          max_bins=511, random_state=random_state)
-
 def amex_metric(y_true: np.array, y_pred: np.array) -> float:
 
     # count of positives and negatives
