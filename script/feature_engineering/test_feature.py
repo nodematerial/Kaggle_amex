@@ -1,5 +1,18 @@
 from feature_engineering import *
 
+
+#クラス名のdirを作成,train/testごとにカラム名で特徴量を保存
+#  class
+#  └train
+#   └col1.pickle
+#   └col2.pickle
+#  └test
+#   └col1.pickle
+#   └col2.pickle
+#
+#sample名
+#
+
 class Sample(Feature):
     def __init__(self):
         super().__init__()
@@ -7,8 +20,9 @@ class Sample(Feature):
         if not os.path.exists(self.dir + self.file_dir):
             os.mkdir(self.dir + self.file_dir)
 
-        
+
     def create_features(self, df):
+        return df , df.columns
         # FEATURE ENGINEERING FROM 
         # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
         all_cols = [c for c in list(df.columns) if c not in ['customer_ID','S_2']]
