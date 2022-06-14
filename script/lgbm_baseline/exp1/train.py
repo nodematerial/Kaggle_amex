@@ -122,8 +122,9 @@ def tuning(train, target, features, CFG, LOGGER = None):
                 'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
                 'feature_fraction': trial.suggest_uniform('feature_fraction', 0.4, 1.0),
                 'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
-                'bagging_freq': trial.suggest_int('bagging_freq', 1, 7),
-                'min_child_samples': trial.suggest_int('min_child_samples', 5, 100),
+                'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
+                'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
                 'force_col_wise': True
             }
     

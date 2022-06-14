@@ -4,8 +4,8 @@ ONLY_FIRST_FOLD : True
 
 # Optuna settings
 
-optuna_trial : 50
-num_boost_round : 1500
+optuna_trial : 150
+num_boost_round : 1600
 
 features_avg : [
 'B_1', 'B_11', 'B_16', 'B_17', 'B_18', 'B_2', 'B_20',
