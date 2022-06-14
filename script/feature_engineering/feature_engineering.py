@@ -38,9 +38,13 @@ class Feature():
     
     def run(self):
         df_processed , columns = self.create_features(self.train_df)
+        df_processed           = reduce_mem_usage(df = df_processed)
+        df_processed.index     = range(len(df_processed))
         for col in columns:
             self.save(df_processed , col ,'train')
             
         df_processed , columns = self.create_features(self.test_df)
+        df_processed           = reduce_mem_usage(df = df_processed)
+        df_processed.index     = range(len(df_processed))
         for col in columns:
             self.save(df_processed , col ,'test')

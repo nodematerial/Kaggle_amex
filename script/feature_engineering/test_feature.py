@@ -22,7 +22,6 @@ class Sample(Feature):
 
 
     def create_features(self, df):
-        return df , df.columns
         # FEATURE ENGINEERING FROM 
         # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
         all_cols = [c for c in list(df.columns) if c not in ['customer_ID','S_2']]
