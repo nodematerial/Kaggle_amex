@@ -1,6 +1,6 @@
 from feature_engineering import *
 
-class sample(Feature):
+class Sample(Feature):
     def __init__(self):
         super().__init__()
         self.file_dir = self.__class__.__name__
@@ -8,7 +8,7 @@ class sample(Feature):
             os.mkdir(self.dir + self.file_dir)
 
         
-    def process_and_feature_engineer(df):
+    def create_features(self, df):
         # FEATURE ENGINEERING FROM 
         # https://www.kaggle.com/code/huseyincot/amex-agg-data-how-it-created
         all_cols = [c for c in list(df.columns) if c not in ['customer_ID','S_2']]
@@ -24,11 +24,16 @@ class sample(Feature):
         df = pd.concat([test_num_agg , test_cat_agg] , axis = 1)
         del test_num_agg, test_cat_agg
         
+        #保存したいデータフレーム、カラムを返す
         return df , df.columns
 
-    def run_train_faetures(self.train_df):
-        process_and_feature_engineer(df)
-        
-test = sample()
-test.process_and_feature_engineer(test_df)
 
+
+def main():            
+    sample = Sample()
+    sample.get_dataset()
+    sample.run()
+
+if __name__ == '__main__':
+    main()
+    

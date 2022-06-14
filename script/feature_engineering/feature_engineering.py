@@ -4,6 +4,7 @@ import os
 import gc
 from datetime import datetime as dt
 from util_fe import *
+import pickle
 
 
 class Feature():
@@ -24,18 +25,6 @@ class Feature():
         return self.train_df, self.test_df
         
         
-    def get_features(self ,features = None):
-        #作成した特徴量の取得
-        if features == None:
-            print('features not selected')
-            exit(0)
-        else:
-            dfs = [pd.read_feather(f'.features/{f}.pickle') for f in features]
-            dfs = reduce_mem_usage(dfs)
-            
-            return dfs
-        
-        
     def save(self ,df, col_name, split_type):
         #作成した特徴量を保存(col名で保存)
         with open(self.dir + self.file_dir + f'/{split_type}/{col_name}.pickle', mode="wb") as f:
@@ -46,10 +35,12 @@ class Feature():
         #作成する特徴量について記述
         pass
     
-    def run_train_faetures(self):
-        #作成する特徴量について記述
-        pass
     
-    def run_test_faetures(self):
-        #作成する特徴量について記述
-        pass
+    def run(self):
+        df_processed , columns = self.create_features(self.train_df)
+        for col in columns:
+            self.save(df_processed , col ,'train')
+            
+        df_processed , columns = self.create_features(self.test_df)
+        for col in columns:
+            self.save(df_processed , col ,'test')
