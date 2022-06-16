@@ -62,8 +62,7 @@ def custom_accuracy(preds, data):
     acc = amex_metric(y_true, preds)
     return ('custom_accuracy', acc, True)
 
-def create_train(CFG, LOGGER = None):
-    df = pd.read_feather(f'../../../data/raw/train_data.ftr')
+def create_train(df, CFG, LOGGER = None):
     cid = pd.Categorical(df.pop('customer_ID'), ordered=True)
     last = (cid != np.roll(cid, -1)) # mask for last statement of every customer
     if 'target' in df.columns:
@@ -118,12 +117,12 @@ def tuning(train, target, features, CFG, LOGGER = None):
                 'metric': 'custom',
                 'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
                 'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
-                'num_leaves': trial.suggest_int('num_leaves', 256, 512),
+                'num_leaves': trial.suggest_int('num_leaves', 100, 400),
                 'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
                 #'feature_fraction': trial.suggest_uniform('feature_fraction', 0.4, 1.0),
                 #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
                 #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
-                'max_depth': trial.suggest_int('max_depth', 4, 8),
+                'max_depth': trial.suggest_int('max_depth', 3, 8),
                 'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
                 'force_col_wise': True
             }
@@ -190,7 +189,11 @@ def main():
     if CFG['log'] == True:
         LOGGER = init_logger(log_file=CFG['logdir']+'/train.log')
 
-    train, target, features = create_train(CFG)
+    train = pd.read_pickle(CFG['df_path'])
+    target = pd.read_csv(CFG['label_pth']).target.values
+    features = train.columns
+    print(train)
+    print(target)
     best_params = tuning(train, target, features, CFG, LOGGER)
     best_params['force_col_wise'] = True
     train_model(train, target, features, best_params, CFG, LOGGER)
