@@ -1,0 +1,303 @@
+[Optuna parameter tuning]
+[ Trial 1 Start ]
+CV Score | 00:26 | Score = 0.79127
+[ Trial 2 Start ]
+CV Score | 00:37 | Score = 0.78692
+[ Trial 3 Start ]
+CV Score | 00:24 | Score = 0.79044
+[ Trial 4 Start ]
+CV Score | 00:27 | Score = 0.78936
+[ Trial 5 Start ]
+CV Score | 00:36 | Score = 0.78902
+[ Trial 6 Start ]
+CV Score | 00:55 | Score = 0.79037
+[ Trial 7 Start ]
+CV Score | 00:28 | Score = 0.78941
+[ Trial 8 Start ]
+CV Score | 00:43 | Score = 0.79130
+[ Trial 9 Start ]
+CV Score | 00:58 | Score = 0.79209
+[ Trial 10 Start ]
+CV Score | 00:48 | Score = 0.78678
+[ Trial 11 Start ]
+CV Score | 01:32 | Score = 0.78064
+[ Trial 12 Start ]
+CV Score | 00:32 | Score = 0.78923
+[ Trial 13 Start ]
+CV Score | 00:37 | Score = 0.79208
+[ Trial 14 Start ]
+CV Score | 00:20 | Score = 0.79057
+[ Trial 15 Start ]
+CV Score | 00:31 | Score = 0.79056
+[ Trial 16 Start ]
+CV Score | 00:41 | Score = 0.79111
+[ Trial 17 Start ]
+CV Score | 00:35 | Score = 0.79077
+[ Trial 18 Start ]
+CV Score | 00:21 | Score = 0.78918
+[ Trial 19 Start ]
+CV Score | 01:14 | Score = 0.78845
+[ Trial 20 Start ]
+CV Score | 00:40 | Score = 0.79138
+[ Trial 21 Start ]
+CV Score | 00:29 | Score = 0.79013
+[ Trial 22 Start ]
+CV Score | 00:44 | Score = 0.79131
+[ Trial 23 Start ]
+CV Score | 00:27 | Score = 0.78800
+[ Trial 24 Start ]
+CV Score | 00:51 | Score = 0.79089
+[ Trial 25 Start ]
+CV Score | 00:30 | Score = 0.79045
+[ Trial 26 Start ]
+CV Score | 00:46 | Score = 0.78594
+[ Trial 27 Start ]
+CV Score | 00:28 | Score = 0.78796
+[ Trial 28 Start ]
+CV Score | 00:38 | Score = 0.78943
+[ Trial 29 Start ]
+CV Score | 00:28 | Score = 0.79062
+[ Trial 30 Start ]
+CV Score | 00:18 | Score = 0.78896
+[ Trial 31 Start ]
+CV Score | 00:47 | Score = 0.79154
+[ Trial 32 Start ]
+CV Score | 00:41 | Score = 0.79079
+[ Trial 33 Start ]
+CV Score | 00:45 | Score = 0.79070
+[ Trial 34 Start ]
+CV Score | 00:55 | Score = 0.79078
+[ Trial 35 Start ]
+CV Score | 00:47 | Score = 0.79023
+[ Trial 36 Start ]
+CV Score | 00:33 | Score = 0.79037
+[ Trial 37 Start ]
+CV Score | 00:27 | Score = 0.78859
+[ Trial 38 Start ]
+CV Score | 00:33 | Score = 0.78878
+[ Trial 39 Start ]
+CV Score | 00:47 | Score = 0.78814
+[ Trial 40 Start ]
+CV Score | 00:44 | Score = 0.79031
+[ Trial 41 Start ]
+CV Score | 00:29 | Score = 0.79074
+[ Trial 42 Start ]
+CV Score | 00:36 | Score = 0.79077
+[ Trial 43 Start ]
+CV Score | 00:27 | Score = 0.78793
+[ Trial 44 Start ]
+CV Score | 00:26 | Score = 0.78538
+[ Trial 45 Start ]
+CV Score | 00:44 | Score = 0.78955
+[ Trial 46 Start ]
+CV Score | 00:40 | Score = 0.79092
+[ Trial 47 Start ]
+CV Score | 00:33 | Score = 0.79049
+[ Trial 48 Start ]
+CV Score | 00:44 | Score = 0.79123
+[ Trial 49 Start ]
+CV Score | 01:12 | Score = 0.78601
+[ Trial 50 Start ]
+CV Score | 00:45 | Score = 0.78787
+[ Trial 51 Start ]
+CV Score | 00:27 | Score = 0.79088
+[ Trial 52 Start ]
+CV Score | 00:40 | Score = 0.79129
+[ Trial 53 Start ]
+CV Score | 00:30 | Score = 0.78970
+[ Trial 54 Start ]
+CV Score | 00:32 | Score = 0.79023
+[ Trial 55 Start ]
+CV Score | 00:25 | Score = 0.79239
+[ Trial 56 Start ]
+CV Score | 00:24 | Score = 0.78941
+[ Trial 57 Start ]
+CV Score | 00:22 | Score = 0.78979
+[ Trial 58 Start ]
+CV Score | 00:21 | Score = 0.79086
+[ Trial 59 Start ]
+CV Score | 00:44 | Score = 0.78935
+[ Trial 60 Start ]
+CV Score | 01:27 | Score = 0.79044
+[ Trial 61 Start ]
+CV Score | 00:30 | Score = 0.79188
+[ Trial 62 Start ]
+CV Score | 00:18 | Score = 0.79052
+[ Trial 63 Start ]
+CV Score | 00:25 | Score = 0.79089
+[ Trial 64 Start ]
+CV Score | 00:28 | Score = 0.79206
+[ Trial 65 Start ]
+CV Score | 00:20 | Score = 0.78987
+[ Trial 66 Start ]
+CV Score | 00:25 | Score = 0.79037
+[ Trial 67 Start ]
+CV Score | 00:23 | Score = 0.78855
+[ Trial 68 Start ]
+CV Score | 00:18 | Score = 0.78965
+[ Trial 69 Start ]
+CV Score | 00:25 | Score = 0.78922
+[ Trial 70 Start ]
+CV Score | 00:16 | Score = 0.78857
+[ Trial 71 Start ]
+CV Score | 00:25 | Score = 0.79149
+[ Trial 72 Start ]
+CV Score | 00:23 | Score = 0.79135
+[ Trial 73 Start ]
+CV Score | 00:20 | Score = 0.78951
+[ Trial 74 Start ]
+CV Score | 00:26 | Score = 0.79080
+[ Trial 75 Start ]
+CV Score | 00:24 | Score = 0.78962
+[ Trial 76 Start ]
+CV Score | 00:27 | Score = 0.79012
+[ Trial 77 Start ]
+CV Score | 00:26 | Score = 0.79115
+[ Trial 78 Start ]
+CV Score | 00:35 | Score = 0.79065
+[ Trial 79 Start ]
+CV Score | 00:24 | Score = 0.78974
+[ Trial 80 Start ]
+CV Score | 00:17 | Score = 0.78949
+[ Trial 81 Start ]
+CV Score | 00:36 | Score = 0.78947
+[ Trial 82 Start ]
+CV Score | 00:26 | Score = 0.79127
+[ Trial 83 Start ]
+CV Score | 00:22 | Score = 0.79002
+[ Trial 84 Start ]
+CV Score | 00:27 | Score = 0.79088
+[ Trial 85 Start ]
+CV Score | 00:25 | Score = 0.79057
+[ Trial 86 Start ]
+CV Score | 00:22 | Score = 0.78984
+[ Trial 87 Start ]
+CV Score | 00:40 | Score = 0.79049
+[ Trial 88 Start ]
+CV Score | 01:03 | Score = 0.79130
+[ Trial 89 Start ]
+CV Score | 00:36 | Score = 0.79154
+[ Trial 90 Start ]
+CV Score | 00:30 | Score = 0.78886
+[ Trial 91 Start ]
+CV Score | 00:31 | Score = 0.78954
+[ Trial 92 Start ]
+CV Score | 00:32 | Score = 0.79019
+[ Trial 93 Start ]
+CV Score | 00:32 | Score = 0.79204
+[ Trial 94 Start ]
+CV Score | 00:25 | Score = 0.79006
+[ Trial 95 Start ]
+CV Score | 00:27 | Score = 0.79033
+[ Trial 96 Start ]
+CV Score | 00:34 | Score = 0.79000
+[ Trial 97 Start ]
+CV Score | 00:33 | Score = 0.79134
+[ Trial 98 Start ]
+CV Score | 00:32 | Score = 0.79098
+[ Trial 99 Start ]
+CV Score | 00:42 | Score = 0.78957
+[ Trial 100 Start ]
+CV Score | 00:23 | Score = 0.78938
+[ Trial 101 Start ]
+CV Score | 00:44 | Score = 0.79073
+[ Trial 102 Start ]
+CV Score | 00:22 | Score = 0.79017
+[ Trial 103 Start ]
+CV Score | 00:42 | Score = 0.79220
+[ Trial 104 Start ]
+CV Score | 00:27 | Score = 0.78780
+[ Trial 105 Start ]
+CV Score | 00:32 | Score = 0.79137
+[ Trial 106 Start ]
+CV Score | 00:36 | Score = 0.79102
+[ Trial 107 Start ]
+CV Score | 00:26 | Score = 0.78782
+[ Trial 108 Start ]
+CV Score | 00:39 | Score = 0.79189
+[ Trial 109 Start ]
+CV Score | 00:53 | Score = 0.79213
+[ Trial 110 Start ]
+CV Score | 00:34 | Score = 0.78970
+[ Trial 111 Start ]
+CV Score | 00:42 | Score = 0.79005
+[ Trial 112 Start ]
+CV Score | 00:40 | Score = 0.79023
+[ Trial 113 Start ]
+CV Score | 00:47 | Score = 0.79003
+[ Trial 114 Start ]
+CV Score | 00:46 | Score = 0.79104
+[ Trial 115 Start ]
+CV Score | 00:36 | Score = 0.78973
+[ Trial 116 Start ]
+CV Score | 00:21 | Score = 0.78852
+[ Trial 117 Start ]
+CV Score | 00:53 | Score = 0.79037
+[ Trial 118 Start ]
+CV Score | 00:37 | Score = 0.78953
+[ Trial 119 Start ]
+CV Score | 00:31 | Score = 0.78878
+[ Trial 120 Start ]
+CV Score | 00:25 | Score = 0.78983
+[ Trial 121 Start ]
+CV Score | 00:31 | Score = 0.79029
+[ Trial 122 Start ]
+CV Score | 00:38 | Score = 0.79064
+[ Trial 123 Start ]
+CV Score | 00:27 | Score = 0.78707
+[ Trial 124 Start ]
+CV Score | 00:51 | Score = 0.79031
+[ Trial 125 Start ]
+CV Score | 01:00 | Score = 0.79183
+[ Trial 126 Start ]
+CV Score | 00:24 | Score = 0.78953
+[ Trial 127 Start ]
+CV Score | 00:48 | Score = 0.79003
+[ Trial 128 Start ]
+CV Score | 00:28 | Score = 0.78884
+[ Trial 129 Start ]
+CV Score | 00:25 | Score = 0.79101
+[ Trial 130 Start ]
+CV Score | 00:33 | Score = 0.79098
+[ Trial 131 Start ]
+CV Score | 00:41 | Score = 0.79008
+[ Trial 132 Start ]
+CV Score | 00:41 | Score = 0.79098
+[ Trial 133 Start ]
+CV Score | 00:40 | Score = 0.79122
+[ Trial 134 Start ]
+CV Score | 00:35 | Score = 0.79058
+[ Trial 135 Start ]
+CV Score | 00:30 | Score = 0.79109
+[ Trial 136 Start ]
+CV Score | 00:24 | Score = 0.79079
+[ Trial 137 Start ]
+CV Score | 00:39 | Score = 0.78992
+[ Trial 138 Start ]
+CV Score | 00:40 | Score = 0.79157
+[ Trial 139 Start ]
+CV Score | 00:34 | Score = 0.79115
+[ Trial 140 Start ]
+CV Score | 00:34 | Score = 0.79005
+[ Trial 141 Start ]
+CV Score | 00:26 | Score = 0.78921
+[ Trial 142 Start ]
+CV Score | 00:43 | Score = 0.78977
+[ Trial 143 Start ]
+CV Score | 00:37 | Score = 0.79047
+[ Trial 144 Start ]
+CV Score | 00:29 | Score = 0.78976
+[ Trial 145 Start ]
+CV Score | 00:41 | Score = 0.78963
+[ Trial 146 Start ]
+CV Score | 00:46 | Score = 0.79173
+[ Trial 147 Start ]
+CV Score | 00:45 | Score = 0.79220
+[ Trial 148 Start ]
+CV Score | 00:33 | Score = 0.79105
+[ Trial 149 Start ]
+CV Score | 00:38 | Score = 0.79261
+[ Trial 150 Start ]
+CV Score | 00:36 | Score = 0.79178
+{'lambda_l1': 3.0969990098106176e-07, 'lambda_l2': 0.00018652225579850597, 'num_leaves': 271, 'learning_rate': 0.05606515250943315, 'max_depth': 7, 'min_child_samples': 2613}
+OOF Score: 0.78575
