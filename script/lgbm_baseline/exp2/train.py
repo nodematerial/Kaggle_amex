@@ -192,8 +192,8 @@ def main():
     train = pd.read_pickle(CFG['df_path'])
     target = pd.read_csv(CFG['label_pth']).target.values
     features = train.columns
-    print(train)
-    print(target)
+    #オンオフ
+    best_params = {}
     best_params = tuning(train, target, features, CFG, LOGGER)
     best_params['force_col_wise'] = True
     train_model(train, target, features, best_params, CFG, LOGGER)
