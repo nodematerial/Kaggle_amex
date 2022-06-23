@@ -5,7 +5,6 @@ label_pth : ../../../data/raw/train_labels.csv
 #'../../../data/raw/train_data.ftr'
 ONLY_FIRST_FOLD : True
 
-
 # Optuna settings
 
 optuna_trial : 150
