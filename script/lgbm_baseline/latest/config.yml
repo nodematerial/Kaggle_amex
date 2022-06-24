@@ -1,15 +1,22 @@
-logdir : out
+#log_settings
+output_dir : out
 log : True
+
 features_path : ../../../data/feature
 label_pth : ../../../data/raw/train_labels.csv
-#'../../../data/raw/train_data.ftr'
-ONLY_FIRST_FOLD : True
 
 # Optuna settings
+use_optuna : False
+optuna_num_trial : 100
+OPTUNA_ONLY_FIRST_FOLD : True 
 
-optuna_trial : 150
-num_boost_round : 1600
+# Model training settings
+eval_interval : 10 # model_trainのevalを何エポック毎に出力するか
+num_boost_round : 300
+ONLY_FIRST_FOLD : False
 
+# Feature selection
+# value に allと設定した場合、全ての特徴量が使用される
 using_features : {
   Basic_Stat : [B_1_last, B_2_last, B_3_last, B_1_max, B_2_max, B_3_max],
   Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]

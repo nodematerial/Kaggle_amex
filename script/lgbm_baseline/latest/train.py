@@ -1,10 +1,8 @@
-from random import triangular
 import numpy as np
 import pandas as pd
 import datetime
 import warnings
 import pickle
-from colorama import Fore, Back, Style
 import gc
 import os
 import yaml
@@ -53,112 +51,146 @@ def custom_accuracy(preds, data):
     return ('custom_accuracy', acc, True)
 
 
-def tuning(train, target, features, CFG, LOGGER = None):
-    LOGGER.info('[Optuna parameter tuning]')
-    kf = StratifiedKFold(n_splits=5)
+class LGBM_baseline():
+    def __init__(self, CFG, logger) -> None:
+        self.STDOUT = set_STDOUT(logger)
+        self.CFG = CFG
+        self.train = self.create_train()
+        self.target = self.create_target()
+        self.features = self.train.columns
+        self.best_params =  {'objective': 'binary', 'metric': 'custom'}
+        if CFG['use_optuna']:
+            self.best_params = self.tuning()
+        self.best_params['force_col_wise'] = True
 
-    def objective(trial):
+
+    def create_train(self) -> pd.DataFrame:
+        features_path = self.CFG['features_path']
+        using_features = self.CFG['using_features']
+
+        for dirname, feature_name in using_features.items():
+            if feature_name == 'all':
+                feature_name = glob.glob(features_path + f'/{dirname}/train/*')
+                feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name]
+
+            for name in feature_name:
+                filepath = features_path + f'/{dirname}/train' + f'/{name}.pickle'
+                one_df = pd.read_pickle(filepath)
+
+                if 'df' in locals():
+                    df = pd.concat([df, one_df], axis=1)
+                else:
+                    df = one_df
+                self.STDOUT(f'loading : {name} of {dirname}')
+
+        self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
+        return df
+
+
+    def create_target(self) -> pd.Series:
+        label_pth = self.CFG['label_pth']
+        target = pd.read_csv(label_pth).target.values
+        return target
+
+
+    def tuning(self) -> dict:
+        num_trial = self.CFG['optuna_num_trial']
+        only_first_fold = self.CFG['OPTUNA_ONLY_FIRST_FOLD']
+
+        self.STDOUT('[Optuna parameter tuning]')
+        kf = StratifiedKFold(n_splits=5)
+
+        def objective(trial):
+            score_list = []
+            start_time = datetime.datetime.now()
+            self.STDOUT(f'[ Trial {trial._trial_id} Start ]')
+
+            for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
+                train_x = self.train.iloc[idx_tr][self.features]
+                valid_x = self.train.iloc[idx_va][self.features]
+                train_y = self.target[idx_tr]
+                valid_y = self.target[idx_va]
+                dtrain = lgb.Dataset(train_x, label=train_y)
+                dvalid = lgb.Dataset(valid_x, label=valid_y)
+
+                param = {
+                    'objective': 'binary',
+                    'metric': 'custom',
+                    'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+                    'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+                    'num_leaves': trial.suggest_int('num_leaves', 100, 400),
+                    'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
+                    #'feature_fraction': trial.suggest_uniform('feature_fraction', 0.4, 1.0),
+                    #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
+                    #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
+                    'max_depth': trial.suggest_int('max_depth', 3, 8),
+                    'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
+                    'force_col_wise': True
+                }
+        
+                gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
+                                num_boost_round=1500,
+                                early_stopping_rounds=50,
+                                verbose_eval=False,
+                                feval = [custom_accuracy])
+                preds = gbm.predict(valid_x)
+                score = amex_metric(valid_y, preds)
+                score_list.append(score)
+
+                if only_first_fold: break
+
+            cv_score = sum(score_list) / len(score_list)
+            self.STDOUT(f"CV Score | {str(datetime.datetime.now() - start_time)[-12:-7]} | Score = {cv_score:.5f}")
+            return cv_score
+
+        study = optuna.create_study(direction='maximize')
+        study.optimize(objective, n_trials=num_trial)
+        best_params = study.best_params
+        self.STDOUT(best_params)
+        return best_params
+
+
+    def train_model(self) -> None:
+        output_dir = self.CFG['output_dir']
+        num_boost_round = self.CFG['num_boost_round']
+        eval_interval = self.CFG['eval_interval']
+        only_first_fold = self.CFG['ONLY_FIRST_FOLD']
         score_list = []
-        start_time = datetime.datetime.now()
-        global trial_number
-        trial_number += 1
-        LOGGER.info(f'[ Trial {trial_number} Start ]')
-
-        for fold, (idx_tr, idx_va) in enumerate(kf.split(train, target)):
-            train_x = train.iloc[idx_tr][features]
-            valid_x = train.iloc[idx_va][features]
-            train_y = target[idx_tr]
-            valid_y = target[idx_va]
+        kf = StratifiedKFold(n_splits=5)
+        for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
+            train_x = self.train.iloc[idx_tr][self.features]
+            valid_x = self.train.iloc[idx_va][self.features]
+            train_y = self.target[idx_tr]
+            valid_y = self.target[idx_va]
             dtrain = lgb.Dataset(train_x, label=train_y)
             dvalid = lgb.Dataset(valid_x, label=valid_y)
 
-            param = {
-                'objective': 'binary',
-                'metric': 'custom',
-                'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
-                'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
-                'num_leaves': trial.suggest_int('num_leaves', 100, 400),
-                'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
-                #'feature_fraction': trial.suggest_uniform('feature_fraction', 0.4, 1.0),
-                #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
-                #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
-                'max_depth': trial.suggest_int('max_depth', 3, 8),
-                'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
-                'force_col_wise': True
-            }
-    
-            gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
-                            num_boost_round=CFG['num_boost_round'],
-                            early_stopping_rounds=50,
-                            verbose_eval=False,
+            gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
+                            num_boost_round=num_boost_round,
+                            callbacks=[lgb.log_evaluation(eval_interval)],
                             feval = [custom_accuracy])
+
             preds = gbm.predict(valid_x)
             score = amex_metric(valid_y, preds)
             score_list.append(score)
+            file = output_dir + f'/model_fold{fold}.pkl'
+            pickle.dump(gbm, open(file, 'wb'))
+            if only_first_fold: break 
 
-            if CFG['ONLY_FIRST_FOLD']: break # we only want the first fold
+        self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
 
-        cv_score = sum(score_list) / len(score_list)
-        if LOGGER:
-            LOGGER.info(f"CV Score | {str(datetime.datetime.now() - start_time)[-12:-7]} | Score = {cv_score:.5f}")
-        else:
-            print(f"{Fore.GREEN}{Style.BRIGHT}CV Score | {str(datetime.datetime.now() - start_time)[-12:-7]} |"
-                  f" Score = {cv_score:.5f}{Style.RESET_ALL}")
-
-        return cv_score
-
-    study = optuna.create_study(direction='maximize')
-    study.optimize(objective, n_trials=CFG['optuna_trial'])
-    best_params = study.best_params
-    LOGGER.info(best_params)
-    return best_params
-
-def train_model(train, target, features, best_param, CFG, LOGGER = None):
-    score_list = []
-    kf = StratifiedKFold(n_splits=5)
-    for fold, (idx_tr, idx_va) in enumerate(kf.split(train, target)):
-        train_x = train.iloc[idx_tr][features]
-        valid_x = train.iloc[idx_va][features]
-        train_y = target[idx_tr]
-        valid_y = target[idx_va]
-        
-        dtrain = lgb.Dataset(train_x, label=train_y)
-        dvalid = lgb.Dataset(valid_x, label=valid_y)
-
-        gbm = lgb.train(best_param, dtrain, valid_sets=[dvalid], 
-                        num_boost_round=CFG['num_boost_round'],
-                        callbacks=[lgb.log_evaluation(10)],
-                        feval = [custom_accuracy])
-
-        preds = gbm.predict(valid_x)
-        score = amex_metric(valid_y, preds)
-        score_list.append(score)
-        file = CFG['logdir'] + f'/model_fold{fold}.pkl'
-        pickle.dump(gbm, open(file, 'wb'))
-    if LOGGER:
-        LOGGER.info(f"OOF Score: {np.mean(score_list):.5f}")
-    else:
-        print(f"{Fore.GREEN}{Style.BRIGHT}OOF Score: {np.mean(score_list):.5f}{Style.RESET_ALL}")
 
 def main():
     with open('config.yml', 'r') as yml:
         CFG = yaml.load(yml, Loader=yaml.SafeLoader)
 
-    os.makedirs(CFG['logdir'], exist_ok=True)
+    os.makedirs(CFG['output_dir'], exist_ok=True)
     LOGGER = None
     if CFG['log'] == True:
-        LOGGER = init_logger(log_file=CFG['logdir']+'/train.log')
+        LOGGER = init_logger(log_file=CFG['output_dir']+'/train.log')
 
-    train = create_train(CFG['features_path'], CFG['using_features'], LOGGER)
-    target = pd.read_csv(CFG['label_pth']).target.values
-    features = train.columns
-    #オンオフ
-    best_params = {}
-    best_params = tuning(train, target, features, CFG, LOGGER)
-    best_params['force_col_wise'] = True
-    train_model(train, target, features, best_params, CFG, LOGGER)
+    baseline = LGBM_baseline(CFG, LOGGER)
+    baseline.train_model()
 
 if __name__ == '__main__':
-    # global variable
-    trial_number = 0
     main()
