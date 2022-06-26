@@ -71,7 +71,7 @@ class LGBM_baseline():
         for dirname, feature_name in using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(features_path + f'/{dirname}/train/*')
-                feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name]
+                feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name if 'customer_ID' not in F]
 
             for name in feature_name:
                 filepath = features_path + f'/{dirname}/train' + f'/{name}.pickle'
