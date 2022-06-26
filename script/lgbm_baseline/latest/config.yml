@@ -1,5 +1,5 @@
 #log_settings
-output_dir : out
+output_dir : model
 log : True
 
 features_path : ../../../data/feature

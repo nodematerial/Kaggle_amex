@@ -52,9 +52,13 @@ def custom_accuracy(preds, data):
 
 
 class LGBM_baseline():
-    def __init__(self, CFG, logger) -> None:
+    def __init__(self, CFG, logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
+        self.features_path = CFG['features_path']
+        self.using_features = CFG['using_features']
+        self.output_dir = CFG['output_dir']
+
         self.train = self.create_train()
         self.target = self.create_target()
         self.features = self.train.columns
@@ -64,17 +68,34 @@ class LGBM_baseline():
         self.best_params['force_col_wise'] = True
 
 
-    def create_train(self) -> pd.DataFrame:
-        features_path = self.CFG['features_path']
-        using_features = self.CFG['using_features']
-
-        for dirname, feature_name in using_features.items():
+    def save_features(self) -> None:
+        features_dict = {}
+        
+        for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
-                feature_name = glob.glob(features_path + f'/{dirname}/train/*')
+                feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
                 feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name if 'customer_ID' not in F]
 
+            features_dict[dirname] = []
             for name in feature_name:
-                filepath = features_path + f'/{dirname}/train' + f'/{name}.pickle'
+                features_dict[dirname].append(name)
+
+        print(features_dict)
+
+        file = self.output_dir + f'/features.pkl'
+        pickle.dump(features_dict, open(file, 'wb'))
+        self.STDOUT(f'saved feature names')
+
+
+    def create_train(self) -> pd.DataFrame:
+        for dirname, feature_name in self.using_features.items():
+            if feature_name == 'all':
+                feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
+                feature_name = [os.path.splitext(os.path.basename(F))[0] 
+                                for F in feature_name if 'customer_ID' not in F]
+
+            for name in feature_name:
+                filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
 
                 if 'df' in locals():
@@ -151,7 +172,6 @@ class LGBM_baseline():
 
 
     def train_model(self) -> None:
-        output_dir = self.CFG['output_dir']
         num_boost_round = self.CFG['num_boost_round']
         eval_interval = self.CFG['eval_interval']
         only_first_fold = self.CFG['ONLY_FIRST_FOLD']
@@ -173,7 +193,7 @@ class LGBM_baseline():
             preds = gbm.predict(valid_x)
             score = amex_metric(valid_y, preds)
             score_list.append(score)
-            file = output_dir + f'/model_fold{fold}.pkl'
+            file = self.output_dir + f'/model_fold{fold}.pkl'
             pickle.dump(gbm, open(file, 'wb'))
             if only_first_fold: break 
 
@@ -191,6 +211,7 @@ def main():
 
     baseline = LGBM_baseline(CFG, LOGGER)
     baseline.train_model()
+    baseline.save_features()
 
 if __name__ == '__main__':
     main()
