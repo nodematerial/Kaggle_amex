@@ -1,16 +1,10 @@
 import numpy as np
 import pandas as pd
-import datetime
 import warnings
 import pickle
-import gc
 import os
-import yaml
+import glob
 
-from sklearn.model_selection import StratifiedKFold
-from utils import *
-import lightgbm as lgb
-import optuna
 
 warnings.filterwarnings('ignore')
 
@@ -49,6 +43,7 @@ class LGBM_inference():
                 model = pickle.load(f)
             output.append(model.predict(self.test))
         output = np.array(output).mean(axis=0)
+        print('inference succeed')
         return output
 
 
