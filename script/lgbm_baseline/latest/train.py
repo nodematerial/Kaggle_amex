@@ -80,11 +80,9 @@ class LGBM_baseline():
             for name in feature_name:
                 features_dict[dirname].append(name)
 
-        print(features_dict)
-
         file = self.output_dir + f'/features.pkl'
         pickle.dump(features_dict, open(file, 'wb'))
-        self.STDOUT(f'saved feature names')
+        self.STDOUT(f'successfully saved feature names')
 
 
     def create_train(self) -> pd.DataFrame:
