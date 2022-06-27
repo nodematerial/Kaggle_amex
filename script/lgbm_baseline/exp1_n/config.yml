@@ -18,10 +18,6 @@ ONLY_FIRST_FOLD : False
 # Feature selection
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
-  Basic_Stat        : [B_1_last, B_2_last, B_3_last, B_1_max, B_2_max, B_3_max],
-  Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days],
-  Date              : all
+  Basic_Stat : [B_1_last, B_2_last, B_3_last, B_1_max, B_2_max, B_3_max],
+  Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]
 }
-
-# pseudo-labeling
-upper : 0.99
