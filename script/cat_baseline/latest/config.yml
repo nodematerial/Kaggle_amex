@@ -1,0 +1,27 @@
+#log_settings
+output_dir : model
+log : True
+GPU : True
+
+features_path : ../../../data/feature
+label_pth : ../../../data/raw/train_labels.csv
+
+# Optuna settings
+use_optuna : False
+optuna_num_trial : 10
+OPTUNA_ONLY_FIRST_FOLD : True 
+
+# Model training settings
+ONLY_FIRST_FOLD : False
+verbose : True
+
+
+# Feature selection
+# value に allと設定した場合、全ての特徴量が使用される
+using_features : {
+  Basic_Stat : all,
+  #Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]
+}
+
+categorical : ['B_30_last', 'B_38_last', 'D_114_last', 'D_116_last', 'D_117_last', 
+               'D_120_last', 'D_126_last', 'D_63_last', 'D_64_last', 'D_66_last', 'D_68_last']
