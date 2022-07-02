@@ -161,8 +161,14 @@ class CAT_baseline():
                 }
                 if self.CFG['GPU']:
                     param['task_type'] = 'GPU'
-        
-                model = CatBoostClassifier(**param)
+
+                if self.CFG['focal_loss']:
+                    model = CatBoostClassifier(loss_function = FocalLoss(),
+                                               eval_metric = 'Logloss', 
+                                               **param)
+                else:
+                    model = CatBoostClassifier(**param)
+
                 model.fit(train_pool)
                 preds = model.predict(valid_pool)
                 score = amex_metric(valid_y, preds)
@@ -195,7 +201,14 @@ class CAT_baseline():
             train_pool = Pool(train_x, train_y, cat_features=categorical)
             valid_pool = Pool(valid_x, valid_y, cat_features=categorical)
 
-            model = CatBoostClassifier(**self.best_params)
+            if self.CFG['focal_loss']:
+                self.STDOUT('#### FOCAL LOSS ####')
+                model = CatBoostClassifier(loss_function = FocalLoss(),
+                                            eval_metric = 'Logloss', 
+                                            **self.best_params)
+            else:
+                model = CatBoostClassifier(**self.best_params)
+
             model.fit(train_pool)
             preds = model.predict(valid_pool)
             score = amex_metric(valid_y, preds)
