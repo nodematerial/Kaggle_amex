@@ -8,11 +8,13 @@ import os
 import yaml
 
 from sklearn.model_selection import StratifiedKFold
-from utils import *
 import lightgbm as lgb
 import optuna
+import sys
 
-from train import *
+sys.path.append("../")
+from latest.train import *
+from utils import *
 
 warnings.filterwarnings('ignore')
 
@@ -21,17 +23,8 @@ warnings.filterwarnings('ignore')
 class LGBM_baseline_pseudo(LGBM_baseline):
     #self.testも呼び出すように修正
     def __init__(self, CFG, logger) -> None:
-        self.STDOUT      = set_STDOUT(logger)
-        self.CFG         = CFG
-        self.train       = self.create_dm(type = 'train')
-        self.test        = self.create_dm(type = 'test')
-        self.target      = self.create_target()
-        self.features    = self.train.columns
-        self.best_params =  {'objective': 'binary', 'metric': 'custom'}
-        if CFG['use_optuna']:
-            self.best_params = self.tuning()
-        self.best_params['force_col_wise'] = True
-
+        super().__init__(CFG, logger)
+        self.test           = self.create_dm(type = 'test')
 
     def create_dm(self , type : str) -> pd.DataFrame:
         features_path = self.CFG['features_path']
@@ -64,7 +57,7 @@ class LGBM_baseline_pseudo(LGBM_baseline):
         only_first_fold  = self.CFG['ONLY_FIRST_FOLD']
         score_list       = []
         test_preds_list  = []
-        kf = StratifiedKFold(n_splits=2)
+        kf = StratifiedKFold(n_splits=5)
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
             train_x = self.train.iloc[idx_tr][self.features]
             valid_x = self.train.iloc[idx_va][self.features]
@@ -110,7 +103,7 @@ class LGBM_baseline_pseudo(LGBM_baseline):
         self.target = np.concatenate([self.target, pseudo0_target])
 
 def main():
-    with open('config.yml', 'r') as yml:
+    with open('config.yml', 'r' , encoding="utf-8_sig") as yml:
         CFG = yaml.load(yml, Loader=yaml.SafeLoader)
 
     os.makedirs(CFG['output_dir'], exist_ok=True)
@@ -122,6 +115,7 @@ def main():
     baseline.train_model()
     baseline.create_pseudo( upper = CFG['upper'])
     baseline.train_model()
+    baseline.save_features()
 
 if __name__ == '__main__':
     main()
