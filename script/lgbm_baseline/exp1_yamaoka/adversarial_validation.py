@@ -1,12 +1,9 @@
 import numpy as np
 import pandas as pd
-import datetime
 import warnings
 import pickle
-import gc
 import os
 import yaml
-from tqdm.auto import tqdm
 import json
 import argparse
 
@@ -14,7 +11,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
 from utils import *
 import lightgbm as lgb
-import optuna
 
 from train import *
 
@@ -23,9 +19,10 @@ warnings.filterwarnings('ignore')
 
 class LGBM_baseline_AdversarialValidation():
     """
-    two methods of adversarial validation
+    3 methods of adversarial validation
         - public vs private
-        - train  vs test
+        - train  vs public
+        - train  vs private
     """
     def __init__(self, CFG, method="public_vs_private", auc_threshold=0.7, logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
@@ -81,48 +78,83 @@ class LGBM_baseline_AdversarialValidation():
                         df = one_df
                     self.STDOUT(f'loading : {name} of {dirname}')
         
-        elif self.adval_method == "train_vs_test":
-            pass
-        elif self.adval_method == "train_vs_public":
-            pass
-        elif self.adval_method == "train_vs_private":
-            pass
         else:
-            pass
+            """
+                train vs public
+                train vs private
+            """
+            for dirname, feature_name in self.using_features.items():
+                if feature_name == 'all':
+                    feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
+                    feature_name = [os.path.splitext(os.path.basename(F))[0] 
+                                    for F in feature_name if 'customer_ID' not in F]
+
+                for name in feature_name:
+                    train_filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
+                    test_filepath = self.features_path + f'/{dirname}/test' + f'/{name}.pickle'
+
+                    train_one_df = pd.read_pickle(train_filepath)
+                    test_one_df = pd.read_pickle(test_filepath)
+
+                    if 'train_df' in locals():
+                        train_df = pd.concat([train_df, train_one_df], axis=1)
+                        test_df = pd.concat([test_df, test_one_df], axis=1)
+                    else:
+                        train_df = train_one_df
+                        test_df = test_one_df
+                    self.STDOUT(f'loading : {name} of {dirname}')
+            
+            train_df["target"] = 0
+            test_df["target"] = 1
+            df = pd.concat([train_df, test_df], axis=0).reset_index(drop=True)
 
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
         return df
 
+    def load_rawdata(self, file_name):
+        #self.STDOUT(f"loading {file_name} ...")
+        df = pd.read_feather(
+            os.path.join(self.raw_path, file_name), 
+            columns=["customer_ID","S_2"]
+            )
+        #self.STDOUT("done!!")
+        df = df.drop_duplicates(subset=["customer_ID"], keep="last").reset_index(drop=True)
+        df['S_2'] = pd.to_datetime(df['S_2'])
+        df['month'] = (df['S_2'].dt.month).astype('int8')
+        return df
 
     def create_target(self) -> np.ndarray:
         self.STDOUT(f"create target for {self.adval_method}")
-        if self.adval_method == "public_vs_private":
-            self.STDOUT("loading test_data.ftr ...")
-            target = pd.read_feather(
-                os.path.join(self.raw_path, "test_data.ftr"), 
-                columns=["customer_ID","S_2"]
-                )
-            self.STDOUT("done!!")
 
-            target = target.drop_duplicates(subset=["customer_ID"], keep="last").reset_index(drop=True)
+        if self.adval_method == "public_vs_private":
+            target = self.load_rawdata("test_data.ftr")
             assert self.train.shape[0] == target.shape[0]
-            target = pd.concat([self.train, target], axis=1)
-            target['S_2'] = pd.to_datetime(target['S_2'])
-            target['month'] = (target['S_2'].dt.month).astype('int8')
-            target = target.reset_index(drop=True)
-            self.train = target.drop(["S_2","month","customer_ID"],axis=1)
             target['private'] = 0
             target.loc[target['month'] == 4,'private'] = 1
             target = target["private"].to_numpy()
 
-        elif self.adval_method == "train_vs_test":
-            pass
-        elif self.adval_method == "train_vs_public":
-            pass
-        elif self.adval_method == "train_vs_private":
-            pass
         else:
-            pass
+            """
+                train vs public
+                train vs private
+            """
+            train = self.load_rawdata("train_data.ftr")
+            test = self.load_rawdata("test_data.ftr")
+            df = pd.concat([train, test], axis=0).reset_index(drop=True)
+            assert self.train.shape[0] == df.shape[0]
+            df = pd.concat([self.train,df], axis=1)
+
+            idx = df[df["target"]==0].index.tolist() # extract train idx
+            if self.adval_method == "train_vs_public":
+                idx.extend(df[(df["target"]==1) & (df["month"]==10)].index.tolist()) # extract public idx and concat train idx
+            elif self.adval_method == "train_vs_private":
+                idx.extend(df[(df["target"]==1) & (df["month"]==4)].index.tolist()) # extract private idx and concat train idx
+            else:
+                idx = df.index.tolist()
+
+            # create dataset concat train and (public or private)
+            self.train = self.train.drop("target", axis=1).iloc[idx].reset_index(drop=True)
+            target = df.iloc[idx]["target"].to_numpy()
 
         return target
 
@@ -131,10 +163,10 @@ class LGBM_baseline_AdversarialValidation():
         num_boost_round = self.CFG['num_boost_round']
         eval_interval = self.CFG['eval_interval']
         only_first_fold = self.CFG['ONLY_FIRST_FOLD']
-        kf = StratifiedKFold(n_splits=3)
+        skf = StratifiedKFold(n_splits=3)
         while True:
             score_list = []
-            for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
+            for fold, (idx_tr, idx_va) in enumerate(skf.split(self.train, self.target)):
                 train_x = self.train.iloc[idx_tr][self.features]
                 valid_x = self.train.iloc[idx_va][self.features]
                 train_y = self.target[idx_tr]
@@ -172,11 +204,12 @@ class LGBM_baseline_AdversarialValidation():
             
 
         drift_dict = {
+            "adval_method":self.adval_method,
             "auc_threshold":self.auc_threshold,
             "importance_type":self.importance_type,
             "drift_features":self.drift_feats
         }        
-        file = os.path.join(self.output_dir, "drift_feats.json")
+        file = os.path.join(self.output_dir, f"{self.adval_method}_drift_feats.json")
         with open(file, "w", encoding='utf-8') as f:
             json.dump(drift_dict, f, indent=2)
 
@@ -197,7 +230,7 @@ def main():
         LOGGER = init_logger(log_file=CFG['output_dir']+'/train.log')
     
     if args.debug:
-        add_feats = ["B_29_min","B_29_max","B_29_mean","B_29_median","B_29_std"]
+        add_feats = ["D_59_min","D_59_max","D_59_mean"]
         CFG["using_features"]["Basic_Stat"].extend(add_feats)
         CFG['num_boost_round'] = 100
 
