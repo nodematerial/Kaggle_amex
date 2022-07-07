@@ -1,5 +1,6 @@
 img/
-data/
+data/feature
+data/raw
 __pycache__/
 ignore/
 *.pkl

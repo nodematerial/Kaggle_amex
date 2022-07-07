@@ -56,6 +56,7 @@ class LGBM_baseline():
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
         self.features_path = CFG['features_path']
+        self.feature_groups_path = CFG['feature_groups_path']
         self.using_features = CFG['using_features']
         self.output_dir = CFG['output_dir']
 
@@ -92,6 +93,14 @@ class LGBM_baseline():
                 feature_name = [os.path.splitext(os.path.basename(F))[0] 
                                 for F in feature_name if 'customer_ID' not in F]
 
+            elif type(feature_name) == str:
+                file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
+                feature_name = []
+                with open(file, 'r') as f:
+                        for line in f:
+                            feature_name.append(line.rstrip("\n"))
+                print(feature_name)
+
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
@@ -113,8 +122,10 @@ class LGBM_baseline():
 
 
     def tuning(self) -> dict:
-        num_trial = self.CFG['optuna_num_trial']
-        only_first_fold = self.CFG['OPTUNA_ONLY_FIRST_FOLD']
+        num_trial = self.CFG['OPTUNA_num_trial']
+        num_boost_round = self.CFG['num_boost_round']
+        only_first_fold = self.CFG['OPTUNA_only_first_fold']
+        early_stopping = self.CFG['OPTUNA_early_stopping_rounds']
 
         self.STDOUT('[Optuna parameter tuning]')
         kf = StratifiedKFold(n_splits=5)
@@ -148,8 +159,8 @@ class LGBM_baseline():
                 }
         
                 gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
-                                num_boost_round=1500,
-                                early_stopping_rounds=50,
+                                num_boost_round=num_boost_round,
+                                early_stopping_rounds=early_stopping,
                                 verbose_eval=False,
                                 feval = [custom_accuracy])
                 preds = gbm.predict(valid_x)
@@ -170,9 +181,10 @@ class LGBM_baseline():
 
 
     def train_model(self) -> None:
-        num_boost_round = self.CFG['num_boost_round']
         eval_interval = self.CFG['eval_interval']
-        only_first_fold = self.CFG['ONLY_FIRST_FOLD']
+        num_boost_round = self.CFG['num_boost_round']
+        only_first_fold = self.CFG['only_first_fold']
+        early_stopping = self.CFG['early_stopping_rounds']
         score_list = []
         kf = StratifiedKFold(n_splits=5)
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
@@ -185,6 +197,7 @@ class LGBM_baseline():
 
             gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
                             num_boost_round=num_boost_round,
+                            early_stopping_rounds=early_stopping,
                             callbacks=[lgb.log_evaluation(eval_interval)],
                             feval = [custom_accuracy])
 
