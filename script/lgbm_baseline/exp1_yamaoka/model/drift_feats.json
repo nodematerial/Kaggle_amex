@@ -1,0 +1,11 @@
+{
+  "auc_threshold": 0.7,
+  "importance_type": "split",
+  "drift_features": [
+    "B_29_std",
+    "B_29_min",
+    "B_29_max",
+    "B_29_mean",
+    "B_29_median"
+  ]
+}
