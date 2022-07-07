@@ -3,6 +3,7 @@ import pandas as pd
 import warnings
 import pickle
 import os
+import sys
 import yaml
 import json
 import argparse
@@ -12,19 +13,22 @@ from sklearn.metrics import roc_auc_score
 from utils import *
 import lightgbm as lgb
 
-from train import *
+sys.path.append("../")
+from latest.train import *
 
 warnings.filterwarnings('ignore')
 
+methods_list = ["public_vs_private","train_vs_public","train_vs_private"]
 
-class LGBM_baseline_AdversarialValidation():
+
+class LGBM_baseline_AdversarialValidation(LGBM_baseline):
     """
     3 methods of adversarial validation
         - public vs private
         - train  vs public
         - train  vs private
     """
-    def __init__(self, CFG, method="public_vs_private", auc_threshold=0.7, logger = None) -> None:
+    def __init__(self, CFG, method : str, auc_threshold : float, logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
         self.features_path = CFG['features_path']
@@ -40,23 +44,6 @@ class LGBM_baseline_AdversarialValidation():
         self.features = self.train.columns
         self.best_params =  {'objective': 'binary', 'metric': 'auc'}
         self.best_params['force_col_wise'] = True
-        
-
-    def save_features(self) -> None:
-        features_dict = {}
-        
-        for dirname, feature_name in self.using_features.items():
-            if feature_name == 'all':
-                feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
-                feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name if 'customer_ID' not in F]
-
-            features_dict[dirname] = []
-            for name in feature_name:
-                features_dict[dirname].append(name)
-
-        file = self.output_dir + f'/features.pkl'
-        pickle.dump(features_dict, open(file, 'wb'))
-        self.STDOUT(f'successfully saved feature names')
 
 
     def create_train(self) -> pd.DataFrame:
@@ -111,7 +98,7 @@ class LGBM_baseline_AdversarialValidation():
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
         return df
 
-    def load_rawdata(self, file_name):
+    def load_rawdata(self, file_name : str):
         #self.STDOUT(f"loading {file_name} ...")
         df = pd.read_feather(
             os.path.join(self.raw_path, file_name), 
@@ -214,12 +201,25 @@ class LGBM_baseline_AdversarialValidation():
             json.dump(drift_dict, f, indent=2)
 
 
+def my_error(method : str) -> None:
+    if method not in methods_list:
+        print(f"{method} method dose not exist")
+        print("you can use --method option")
+        for m in methods_list:
+            print(f"    - {m}")
+        sys.exit(1)
+    else:
+        pass
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--method", type=str, default="public_vs_private")
     parser.add_argument("--threshold", type=float, default=0.7)
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
+
+    my_error(args.method)
 
     with open('config.yml', 'r') as yml:
         CFG = yaml.load(yml, Loader=yaml.SafeLoader)
