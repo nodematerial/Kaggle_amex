@@ -17,6 +17,7 @@ class LGBM_inference():
 
 
     def create_test(self) -> pd.DataFrame:
+        df_dict = {}
         with open('model/features.pkl', 'rb') as f:
             using_features = pickle.load(f)
             
@@ -24,13 +25,9 @@ class LGBM_inference():
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/test' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
-
-                if 'df' in locals():
-                    df = pd.concat([df, one_df], axis=1)
-                else:
-                    df = one_df
+                df_dict[one_df.name] = one_df.values
                 print(f'loading : {name} of {dirname}')
-
+        df = pd.DataFrame(df_dict)
         return df
         
     def infer(self) -> list:
