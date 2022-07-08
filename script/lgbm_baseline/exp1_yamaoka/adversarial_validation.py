@@ -8,7 +8,7 @@ import yaml
 import json
 import argparse
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import roc_auc_score
 from utils import *
 import lightgbm as lgb
@@ -28,7 +28,14 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
         - train  vs public
         - train  vs private
     """
-    def __init__(self, CFG, method : str, auc_threshold : float, logger = None) -> None:
+    def __init__(
+        self, 
+        CFG, 
+        method : str, 
+        auc_threshold : float,
+        sampling_rate : float,
+        num_dropfeats : int,
+        logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
         self.features_path = CFG['features_path']
@@ -44,52 +51,70 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
         self.features = self.train.columns
         self.best_params =  {'objective': 'binary', 'metric': 'auc'}
         self.best_params['force_col_wise'] = True
+        self.sampling_rate = sampling_rate
+        self.num_dropfeats = num_dropfeats
+        self.drift_feats_df = None
+        self.max_drift_feats = []
 
 
     def create_train(self) -> pd.DataFrame:
         self.STDOUT(f"create train for {self.adval_method}")
         if self.adval_method == "public_vs_private":
+            test_df_dict = {}
             for dirname, feature_name in self.using_features.items():
                 if feature_name == 'all':
                     feature_name = glob.glob(self.features_path + f'/{dirname}/test/*')
                     feature_name = [os.path.splitext(os.path.basename(F))[0]
                                     for F in feature_name if 'customer_ID' not in F]
 
+                elif type(feature_name) == str:
+                    file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
+                    feature_name = []
+                    with open(file, 'r') as f:
+                            for line in f:
+                                feature_name.append(line.rstrip("\n"))
+                    print(feature_name)
+
                 for name in feature_name:
                     filepath = self.features_path + f'/{dirname}/test' + f'/{name}.pickle'
                     one_df = pd.read_pickle(filepath)
-
-                    if 'df' in locals():
-                        df = pd.concat([df, one_df], axis=1)
-                    else:
-                        df = one_df
+                    test_df_dict[one_df.name] = one_df.values
                     self.STDOUT(f'loading : {name} of {dirname}')
+
+            df = pd.DataFrame(test_df_dict)
         
         else:
             """
                 train vs public
                 train vs private
             """
+            train_df_dict = {}
+            test_df_dict = {}
             for dirname, feature_name in self.using_features.items():
                 if feature_name == 'all':
                     feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
                     feature_name = [os.path.splitext(os.path.basename(F))[0] 
                                     for F in feature_name if 'customer_ID' not in F]
+                
+                elif type(feature_name) == str:
+                    file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
+                    feature_name = []
+                    with open(file, 'r') as f:
+                            for line in f:
+                                feature_name.append(line.rstrip("\n"))
+                    print(feature_name)
 
                 for name in feature_name:
                     train_filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                     test_filepath = self.features_path + f'/{dirname}/test' + f'/{name}.pickle'
-
                     train_one_df = pd.read_pickle(train_filepath)
                     test_one_df = pd.read_pickle(test_filepath)
-
-                    if 'train_df' in locals():
-                        train_df = pd.concat([train_df, train_one_df], axis=1)
-                        test_df = pd.concat([test_df, test_one_df], axis=1)
-                    else:
-                        train_df = train_one_df
-                        test_df = test_one_df
+                    train_df_dict[train_one_df.name] = train_one_df.values
+                    test_df_dict[test_one_df.name] = test_one_df.values
                     self.STDOUT(f'loading : {name} of {dirname}')
+
+            train_df = pd.DataFrame(train_df_dict)
+            test_df = pd.DataFrame(test_df_dict)
             
             train_df["target"] = 0
             test_df["target"] = 1
@@ -99,12 +124,12 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
         return df
 
     def load_rawdata(self, file_name : str):
-        #self.STDOUT(f"loading {file_name} ...")
+        self.STDOUT(f"loading {file_name} ...")
         df = pd.read_feather(
             os.path.join(self.raw_path, file_name), 
             columns=["customer_ID","S_2"]
             )
-        #self.STDOUT("done!!")
+        self.STDOUT("done!!")
         df = df.drop_duplicates(subset=["customer_ID"], keep="last").reset_index(drop=True)
         df['S_2'] = pd.to_datetime(df['S_2'])
         df['month'] = (df['S_2'].dt.month).astype('int8')
@@ -145,12 +170,26 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
 
         return target
 
+    def sampling_train(self) -> None:
+        self.train, _, self.target, _ = train_test_split(
+            self.train, 
+            self.target, 
+            train_size=self.sampling_rate, 
+            random_state=42, 
+            stratify=self.target
+            )
+
 
     def train_model(self) -> None:
         num_boost_round = self.CFG['num_boost_round']
         eval_interval = self.CFG['eval_interval']
         only_first_fold = self.CFG['ONLY_FIRST_FOLD']
-        skf = StratifiedKFold(n_splits=3)
+        skf = StratifiedKFold(n_splits=2)
+        if self.sampling_rate < 1.0:
+            self.STDOUT(f"before sampling {len(self.train)} rows")
+            self.sampling_train()
+            self.STDOUT(f"after sampling {len(self.train)} rows")
+
         while True:
             score_list = []
             for fold, (idx_tr, idx_va) in enumerate(skf.split(self.train, self.target)):
@@ -179,26 +218,51 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
             
             self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
 
-            if sum(score_list)/len(score_list) > self.auc_threshold:
-                max_drift_feat = importance_df['importance'].idxmax()
-                self.drift_feats.append(max_drift_feat)
-                self.train.drop(max_drift_feat, axis=1, inplace=True)
+            # 一定のauc値より高ければimportanceが大きいdrift featuresをdropする
+            if np.mean(score_list) > self.auc_threshold:
+                if self.num_dropfeats > len(self.features):
+                    self.num_dropfeats = len(self.features)
+                    
+                self.max_drift_feats = importance_df.apply(
+                    lambda s: s.nlargest(self.num_dropfeats).index.tolist(), 
+                    axis=0).to_numpy().flatten().tolist()
+                self.drift_feats.extend(self.max_drift_feats)
+                self.drift_feats_df = self.train[self.max_drift_feats].copy()
+                self.train.drop(self.max_drift_feats, axis=1, inplace=True)
                 self.features = self.train.columns
-                self.STDOUT(f"drop drift feature : {max_drift_feat}")
+                self.STDOUT(f"drop drift feature : {self.max_drift_feats}")
                 self.STDOUT(f"next using features : {self.features.tolist()}")
+                self.STDOUT(f"num of drift features : {len(self.drift_feats)}")
+                self.STDOUT(f"drift features : {self.drift_feats}")
             else:
-                break
+                # 余分にdrop featureした場合、戻して1つずつaucを確認しながらdropする
+                if len(self.max_drift_feats) > 1:
+                    self.STDOUT(self.max_drift_feats)
+                    self.drift_feats = [feat for feat in self.drift_feats if feat not in self.max_drift_feats]
+                    self.STDOUT(self.drift_feats)
+                    self.train = pd.concat([self.train, self.drift_feats_df], axis=1)
+                    self.features = self.train.columns
+                    self.STDOUT(self.train.columns)
+                    self.num_dropfeats = 1
+                else:
+                    break
             
 
         drift_dict = {
             "adval_method":self.adval_method,
             "auc_threshold":self.auc_threshold,
+            "sampling_rate":self.sampling_rate,
             "importance_type":self.importance_type,
             "drift_features":self.drift_feats
         }        
         file = os.path.join(self.output_dir, f"{self.adval_method}_drift_feats.json")
         with open(file, "w", encoding='utf-8') as f:
             json.dump(drift_dict, f, indent=2)
+        
+        file = os.path.join(self.output_dir, f"{self.adval_method}_feats.txt")
+        with open(file, 'w') as f:
+            for feat in self.features:
+                f.write("%s\n" % feat)
 
 
 def my_error(method : str) -> None:
@@ -215,8 +279,10 @@ def my_error(method : str) -> None:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--method", type=str, default="public_vs_private")
-    parser.add_argument("--threshold", type=float, default=0.7)
-    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--threshold", type=float, default=0.7) # rocaucがthreshold未満になるまでvalidationを行う
+    parser.add_argument("--sampling_rate", type=float, default=1.0) # trainのsampling rate（学習の高速化のため）
+    parser.add_argument("--num_dropfeats", type=int, default=5) # importanceが上位num_dropfeats個の特徴量をdropする
+    parser.add_argument("--debug", action="store_true") # 動作確認用
     args = parser.parse_args()
 
     my_error(args.method)
@@ -232,12 +298,15 @@ def main():
     if args.debug:
         add_feats = ["D_59_min","D_59_max","D_59_mean"]
         CFG["using_features"]["Basic_Stat"].extend(add_feats)
-        CFG['num_boost_round'] = 100
+        CFG['num_boost_round'] = 10
+    
 
     baseline = LGBM_baseline_AdversarialValidation(
         CFG=CFG,
         method=args.method,
         auc_threshold=args.threshold,
+        sampling_rate=args.sampling_rate,
+        num_dropfeats=args.num_dropfeats,
         logger=LOGGER
         )
     baseline.train_model()

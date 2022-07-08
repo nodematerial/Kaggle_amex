@@ -12,12 +12,12 @@ OPTUNA_ONLY_FIRST_FOLD : True
 
 # Model training settings
 eval_interval : 10 # model_trainのevalを何エポック毎に出力するか
-num_boost_round : 300
+num_boost_round : 30
 ONLY_FIRST_FOLD : False
 
 # Feature selection
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
-  Basic_Stat : [B_1_last, B_2_last, B_3_last, B_1_max, B_2_max, B_3_max],
-  Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]
+  Basic_Stat : all,
+  #Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]
 }
