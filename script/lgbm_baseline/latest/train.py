@@ -66,6 +66,12 @@ class LGBM_baseline():
         self.best_params =  {'objective': 'binary', 'metric': 'custom'}
         if CFG['use_optuna']:
             self.best_params = self.tuning()
+        if CFG['use_custom_params']:
+            self.STDOUT(f'[ USING CUSTOM PARAMS ]')
+            assert type(CFG['custom_params']) is dict
+            self.best_params = CFG['custom_params']
+            for key, value in self.best_params.items():
+                self.STDOUT(f'{key} : {value}')
         self.best_params['force_col_wise'] = True
 
 
