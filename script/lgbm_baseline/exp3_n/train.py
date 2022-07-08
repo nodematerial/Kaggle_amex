@@ -81,15 +81,7 @@ class LGBM_baseline():
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
-                feature_name = [os.path.splitext(os.path.basename(F))[0]
-                 for F in feature_name if 'customer_ID' not in F]
-
-            elif type(feature_name) == str:
-                file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
-                feature_name = []
-                with open(file, 'r') as f:
-                        for line in f:
-                            feature_name.append(line.rstrip("\n"))
+                feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name if 'customer_ID' not in F]
 
             features_dict[dirname] = []
             for name in feature_name:
@@ -101,7 +93,6 @@ class LGBM_baseline():
 
 
     def create_train(self) -> pd.DataFrame:
-        df_dict = {}
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
@@ -118,9 +109,13 @@ class LGBM_baseline():
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
-                df_dict[one_df.name] = one_df.values
+
+                if 'df' in locals():
+                    df = pd.concat([df, one_df], axis=1)
+                else:
+                    df = one_df
                 self.STDOUT(f'loading : {name} of {dirname}')
-        df = pd.DataFrame(df_dict)
+
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
         return df
 

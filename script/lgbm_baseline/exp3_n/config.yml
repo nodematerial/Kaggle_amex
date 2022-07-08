@@ -1,0 +1,40 @@
+#log_settings
+output_dir : model
+log : True
+
+# Directory path settings
+features_path : ../../../data/feature
+feature_groups_path : ../../../data/feature_groups
+label_pth : ../../../data/raw/train_labels.csv
+
+# Optuna settings
+use_optuna : False
+OPTUNA_num_trial : 100
+OPTUNA_num_boost_round : 300
+OPTUNA_early_stopping_rounds : 50
+OPTUNA_only_first_fold : True 
+
+# Model training settings
+eval_interval : 10 # model_trainのevalを何エポック毎に出力するか
+num_boost_round : 1800
+early_stopping_rounds : 300
+only_first_fold : False
+
+# Custom param settings ※ use_optuna を On にしていた場合、こちらが優先して使われる。
+use_custom_params : True
+custom_params : {
+  learning_rate : 0.03, 
+  reg_lambda : 50,
+  min_child_samples : 2400,
+  num_leaves : 95,
+  colsample_bytree : 0.19,
+  max_bins : 511,
+} 
+# from https://www.kaggle.com/code/ambrosm/amex-lightgbm-quickstart
+
+# Feature selection settings
+# value に allと設定した場合、全ての特徴量が使用される
+using_features : {
+  Basic_Stat : all,
+  Period_Basic_Stat : []
+}
