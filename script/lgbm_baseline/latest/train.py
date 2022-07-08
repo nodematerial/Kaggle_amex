@@ -87,6 +87,7 @@ class LGBM_baseline():
 
 
     def create_train(self) -> pd.DataFrame:
+        df_dict = {}
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
@@ -104,13 +105,9 @@ class LGBM_baseline():
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
-
-                if 'df' in locals():
-                    df = pd.concat([df, one_df], axis=1)
-                else:
-                    df = one_df
+                df_dict[one_df.name] = one_df.values
                 self.STDOUT(f'loading : {name} of {dirname}')
-
+        df = pd.DataFrame(df_dict)
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
         return df
 
