@@ -99,7 +99,6 @@ class LGBM_baseline():
                 with open(file, 'r') as f:
                         for line in f:
                             feature_name.append(line.rstrip("\n"))
-                print(feature_name)
 
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
