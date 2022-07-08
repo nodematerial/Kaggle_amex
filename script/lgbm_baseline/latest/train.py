@@ -66,6 +66,12 @@ class LGBM_baseline():
         self.best_params =  {'objective': 'binary', 'metric': 'custom'}
         if CFG['use_optuna']:
             self.best_params = self.tuning()
+        if CFG['use_custom_params']:
+            self.STDOUT(f'[ USING CUSTOM PARAMS ]')
+            assert type(CFG['custom_params']) is dict
+            self.best_params = CFG['custom_params']
+            for key, value in self.best_params.items():
+                self.STDOUT(f'{key} : {value}')
         self.best_params['force_col_wise'] = True
 
 
@@ -99,7 +105,6 @@ class LGBM_baseline():
                 with open(file, 'r') as f:
                         for line in f:
                             feature_name.append(line.rstrip("\n"))
-                print(feature_name)
 
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'

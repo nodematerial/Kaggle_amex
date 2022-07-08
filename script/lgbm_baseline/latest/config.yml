@@ -2,6 +2,7 @@
 output_dir : model
 log : True
 
+# Directory path settings
 features_path : ../../../data/feature
 feature_groups_path : ../../../data/feature_groups
 label_pth : ../../../data/raw/train_labels.csv
@@ -19,7 +20,19 @@ num_boost_round : 1800
 early_stopping_rounds : 300
 only_first_fold : False
 
-# Feature selection
+# Custom param settings ※ use_optuna を On にしていた場合、こちらが優先して使われる。
+use_custom_params : False
+custom_params : {
+  learning_rate : 0.03, 
+  reg_lambda : 50,
+  min_child_samples : 2400,
+  num_leaves : 95,
+  colsample_bytree : 0.19,
+  max_bins : 511,
+} 
+# from https://www.kaggle.com/code/ambrosm/amex-lightgbm-quickstart
+
+# Feature selection settings
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
   Basic_Stat : importance_top100,
