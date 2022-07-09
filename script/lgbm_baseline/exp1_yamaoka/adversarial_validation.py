@@ -222,7 +222,7 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
             if np.mean(score_list) > self.auc_threshold:
                 if self.num_dropfeats > len(self.features):
                     self.num_dropfeats = len(self.features)
-                    
+
                 self.max_drift_feats = importance_df.apply(
                     lambda s: s.nlargest(self.num_dropfeats).index.tolist(), 
                     axis=0).to_numpy().flatten().tolist()
@@ -237,12 +237,12 @@ class LGBM_baseline_AdversarialValidation(LGBM_baseline):
             else:
                 # 余分にdrop featureした場合、戻して1つずつaucを確認しながらdropする
                 if len(self.max_drift_feats) > 1:
-                    self.STDOUT(self.max_drift_feats)
+                    #self.STDOUT(self.max_drift_feats)
                     self.drift_feats = [feat for feat in self.drift_feats if feat not in self.max_drift_feats]
-                    self.STDOUT(self.drift_feats)
+                    #self.STDOUT(self.drift_feats)
                     self.train = pd.concat([self.train, self.drift_feats_df], axis=1)
                     self.features = self.train.columns
-                    self.STDOUT(self.train.columns)
+                    #self.STDOUT(self.train.columns)
                     self.num_dropfeats = 1
                 else:
                     break
@@ -296,8 +296,8 @@ def main():
         LOGGER = init_logger(log_file=CFG['output_dir']+'/train.log')
     
     if args.debug:
-        add_feats = ["D_59_min","D_59_max","D_59_mean"]
-        CFG["using_features"]["Basic_Stat"].extend(add_feats)
+        add_feats = ["B_1_last", "B_2_last", "B_3_last", "B_1_max", "B_2_max","B_3_max","D_59_min","D_59_max","D_59_mean"]
+        CFG["using_features"]["Basic_Stat"] = add_feats
         CFG['num_boost_round'] = 10
     
 
