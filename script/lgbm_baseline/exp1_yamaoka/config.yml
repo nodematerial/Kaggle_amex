@@ -1,5 +1,5 @@
 #log_settings
-output_dir : model
+output_dir : period
 log : True
 
 features_path : ../../../data/feature
@@ -18,6 +18,6 @@ ONLY_FIRST_FOLD : False
 # Feature selection
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
-  Basic_Stat : all,
-  #Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]
+  #Basic_Stat : all,
+  Period_Basic_Stat : all
 }
