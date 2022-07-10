@@ -15,15 +15,15 @@ OPTUNA_early_stopping_rounds : 50
 OPTUNA_only_first_fold : True 
 
 # Model training settings
-eval_interval : 10 # model_trainのevalを何エポック毎に出力するか
-num_boost_round : 1800
+eval_interval : 100 # model_trainのevalを何エポック毎に出力するか
+num_boost_round : 2500
 early_stopping_rounds : 300
 only_first_fold : False
 
 # Custom param settings ※ use_optuna を On にしていた場合、こちらが優先して使われる。
-use_custom_params : False
+use_custom_params : True
 custom_params : {
-  learning_rate : 0.03, 
+  learning_rate : 0.01, 
   reg_lambda : 50,
   min_child_samples : 2400,
   num_leaves : 95,
@@ -36,5 +36,5 @@ custom_params : {
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
   Basic_Stat : importance_top100,
-  #Period_Basic_Stat : [B_1_max_100days, B_2_max_100days, B_3_max_100days, B_4_max_100days]
+  Period_Basic_Stat : []
 }

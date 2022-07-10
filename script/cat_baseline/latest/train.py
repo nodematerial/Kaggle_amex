@@ -9,7 +9,7 @@ import yaml
 
 from sklearn.model_selection import StratifiedKFold
 from utils import *
-import lightgbm as lgb
+from catboost import Pool, CatBoostClassifier
 import optuna
 
 warnings.filterwarnings('ignore')
@@ -51,29 +51,26 @@ def custom_accuracy(preds, data):
     return ('custom_accuracy', acc, True)
 
 
-class LGBM_baseline():
+class CAT_baseline():
     def __init__(self, CFG, logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
         self.features_path = CFG['features_path']
-        self.feature_groups_path = CFG['feature_groups_path']
         self.using_features = CFG['using_features']
         self.output_dir = CFG['output_dir']
 
-        self.train = self.create_train()
+        self.train = self.create_train()[0]
+        self.categorical = self.create_train()[1]
         self.target = self.create_target()
         self.features = self.train.columns
-        self.best_params =  {'objective': 'binary', 'metric': 'custom'}
+        self.best_params =  {}
         if CFG['use_optuna']:
             self.best_params = self.tuning()
-        if CFG['use_custom_params']:
-            self.STDOUT(f'[ USING CUSTOM PARAMS ]')
-            assert type(CFG['custom_params']) is dict
-            self.best_params = CFG['custom_params']
-            for key, value in self.best_params.items():
-                self.STDOUT(f'{key} : {value}')
-        self.best_params['force_col_wise'] = True
-
+        self.best_params['verbose'] = self.CFG['verbose']
+        self.best_params['allow_writing_files'] = False
+        if self.CFG['GPU']:
+            self.STDOUT('###### GPU MODE ######')
+            self.best_params['task_type'] = 'GPU'
 
     def save_features(self) -> None:
         features_dict = {}
@@ -81,15 +78,7 @@ class LGBM_baseline():
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
-                feature_name = [os.path.splitext(os.path.basename(F))[0]
-                 for F in feature_name if 'customer_ID' not in F]
-
-            elif type(feature_name) == str:
-                file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
-                feature_name = []
-                with open(file, 'r') as f:
-                        for line in f:
-                            feature_name.append(line.rstrip("\n"))
+                feature_name = [os.path.splitext(os.path.basename(F))[0] for F in feature_name if 'customer_ID' not in F]
 
             features_dict[dirname] = []
             for name in feature_name:
@@ -101,28 +90,35 @@ class LGBM_baseline():
 
 
     def create_train(self) -> pd.DataFrame:
-        df_dict = {}
+        categorical_used = []
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
                 feature_name = [os.path.splitext(os.path.basename(F))[0] 
                                 for F in feature_name if 'customer_ID' not in F]
 
-            elif type(feature_name) == str:
-                file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
-                feature_name = []
-                with open(file, 'r') as f:
-                        for line in f:
-                            feature_name.append(line.rstrip("\n"))
-
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
-                df_dict[one_df.name] = one_df.values
+                # categoricalに欠損値が入るとデータ型がおかしくなるため、最頻値で埋める
+                if name in self.CFG['categorical']:
+                    categorical_used.append(name)
+                    one_df = one_df.fillna(one_df.mode().iloc[0])
+                    try:
+                        one_df = one_df.astype('int')
+                    except:
+                        pass
+                    one_df = one_df.astype('category')
+
+                if 'df' in locals():
+                    df = pd.concat([df, one_df], axis=1)
+                else:
+                    df = one_df
                 self.STDOUT(f'loading : {name} of {dirname}')
-        df = pd.DataFrame(df_dict)
+
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
-        return df
+        self.STDOUT(f'used categorical_features : {categorical_used}')
+        return df, categorical_used
 
 
     def create_target(self) -> pd.Series:
@@ -132,10 +128,8 @@ class LGBM_baseline():
 
 
     def tuning(self) -> dict:
-        num_trial = self.CFG['OPTUNA_num_trial']
-        num_boost_round = self.CFG['num_boost_round']
-        only_first_fold = self.CFG['OPTUNA_only_first_fold']
-        early_stopping = self.CFG['OPTUNA_early_stopping_rounds']
+        num_trial = self.CFG['optuna_num_trial']
+        only_first_fold = self.CFG['OPTUNA_ONLY_FIRST_FOLD']
 
         self.STDOUT('[Optuna parameter tuning]')
         kf = StratifiedKFold(n_splits=5)
@@ -144,36 +138,39 @@ class LGBM_baseline():
             score_list = []
             start_time = datetime.datetime.now()
             self.STDOUT(f'[ Trial {trial._trial_id} Start ]')
+            categorical = self.categorical
 
             for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
                 train_x = self.train.iloc[idx_tr][self.features]
                 valid_x = self.train.iloc[idx_va][self.features]
                 train_y = self.target[idx_tr]
                 valid_y = self.target[idx_va]
-                dtrain = lgb.Dataset(train_x, label=train_y)
-                dvalid = lgb.Dataset(valid_x, label=valid_y)
+                train_pool = Pool(train_x, train_y, cat_features=categorical)
+                valid_pool = Pool(valid_x, valid_y, cat_features=categorical)
 
                 param = {
-                    'objective': 'binary',
-                    'metric': 'custom',
-                    'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
-                    'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
-                    'num_leaves': trial.suggest_int('num_leaves', 100, 400),
-                    'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
-                    #'feature_fraction': trial.suggest_uniform('feature_fraction', 0.4, 1.0),
-                    #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
-                    #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
-                    'max_depth': trial.suggest_int('max_depth', 3, 8),
-                    'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
-                    'force_col_wise': True
+                    'iterations' : trial.suggest_int('iterations', 200, 600),                         
+                    'depth' : trial.suggest_int('depth', 4, 10),                                       
+                    'learning_rate' : trial.suggest_loguniform('learning_rate', 0.01, 0.1),               
+                    'random_strength' :trial.suggest_int('random_strength', 0, 100),                       
+                    'bagging_temperature' :trial.suggest_loguniform('bagging_temperature', 0.01, 100.00), 
+                    'od_type': trial.suggest_categorical('od_type', ['IncToDec', 'Iter']),
+                    'od_wait' :trial.suggest_int('od_wait', 10, 50),
+                    'verbose' : False,
+                    'allow_writing_files' : False,
                 }
-        
-                gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
-                                num_boost_round=num_boost_round,
-                                early_stopping_rounds=early_stopping,
-                                verbose_eval=False,
-                                feval = [custom_accuracy])
-                preds = gbm.predict(valid_x)
+                if self.CFG['GPU']:
+                    param['task_type'] = 'GPU'
+
+                if self.CFG['focal_loss']:
+                    model = CatBoostClassifier(loss_function = FocalLoss(),
+                                               eval_metric = 'Logloss', 
+                                               **param)
+                else:
+                    model = CatBoostClassifier(**param)
+
+                model.fit(train_pool)
+                preds = model.predict(valid_pool)
                 score = amex_metric(valid_y, preds)
                 score_list.append(score)
 
@@ -191,34 +188,37 @@ class LGBM_baseline():
 
 
     def train_model(self) -> None:
-        eval_interval = self.CFG['eval_interval']
-        num_boost_round = self.CFG['num_boost_round']
-        only_first_fold = self.CFG['only_first_fold']
-        early_stopping = self.CFG['early_stopping_rounds']
+        only_first_fold = self.CFG['ONLY_FIRST_FOLD']
         score_list = []
         kf = StratifiedKFold(n_splits=5)
+        categorical = self.categorical
+
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
             train_x = self.train.iloc[idx_tr][self.features]
             valid_x = self.train.iloc[idx_va][self.features]
             train_y = self.target[idx_tr]
             valid_y = self.target[idx_va]
-            dtrain = lgb.Dataset(train_x, label=train_y)
-            dvalid = lgb.Dataset(valid_x, label=valid_y)
+            train_pool = Pool(train_x, train_y, cat_features=categorical)
+            valid_pool = Pool(valid_x, valid_y, cat_features=categorical)
 
-            gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
-                            num_boost_round=num_boost_round,
-                            early_stopping_rounds=early_stopping,
-                            callbacks=[lgb.log_evaluation(eval_interval)],
-                            feval = [custom_accuracy])
+            if self.CFG['focal_loss']:
+                self.STDOUT('#### FOCAL LOSS ####')
+                model = CatBoostClassifier(loss_function = FocalLoss(),
+                                            eval_metric = 'Logloss', 
+                                            **self.best_params)
+            else:
+                model = CatBoostClassifier(**self.best_params)
 
-            preds = gbm.predict(valid_x)
+            model.fit(train_pool)
+            preds = model.predict(valid_pool)
             score = amex_metric(valid_y, preds)
             score_list.append(score)
+            self.STDOUT(f'fold {fold} score: {score:.4f}')
             file = self.output_dir + f'/model_fold{fold}.pkl'
-            pickle.dump(gbm, open(file, 'wb'))
+            pickle.dump(model, open(file, 'wb'))
             if only_first_fold: break 
 
-        self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
+        self.STDOUT(f"OOF Score: {np.mean(score_list):.4f}")
 
 
 def main():
@@ -230,7 +230,7 @@ def main():
     if CFG['log'] == True:
         LOGGER = init_logger(log_file=CFG['output_dir']+'/train.log')
 
-    baseline = LGBM_baseline(CFG, LOGGER)
+    baseline = CAT_baseline(CFG, LOGGER)
     baseline.train_model()
     baseline.save_features()
 

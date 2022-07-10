@@ -29,14 +29,20 @@ class Feature():
         
     def save(self ,df, col_name, split_type):
         #作成した特徴量を保存(col名で保存)
+        data = self.change_obj2cat(df[col_name])
         with open(self.parent + self.feature_pth + self.file_dir +  f'/{split_type}/{col_name}.pickle', mode="wb") as f:
-            pickle.dump(df[col_name], f)
+            pickle.dump(data, f)
 
             
     def create_features(self):
         #作成する特徴量について記述
         pass
     
+    def change_obj2cat(self, data):
+        if data.dtype == 'O':
+            return data.astype('category')
+        else:
+            return data
     
     def run(self):
         print('creating train features...')
