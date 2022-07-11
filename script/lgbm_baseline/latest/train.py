@@ -67,12 +67,16 @@ class LGBM_baseline():
         if CFG['use_optuna']:
             self.best_params = self.tuning()
         if CFG['use_custom_params']:
-            self.STDOUT(f'[ USING CUSTOM PARAMS ]')
             assert type(CFG['custom_params']) is dict
             self.best_params = CFG['custom_params']
-            for key, value in self.best_params.items():
-                self.STDOUT(f'{key} : {value}')
         self.best_params['force_col_wise'] = True
+        self.best_params['boosting'] = CFG['boosting_type']
+
+        self.STDOUT(f'[ USING CUSTOM PARAMS ]')
+        self.STDOUT('=' * 30)
+        for key, value in self.best_params.items():
+            self.STDOUT(f'{key} : {value}')
+        self.STDOUT('=' * 30)
 
 
     def save_features(self) -> None:
@@ -136,6 +140,7 @@ class LGBM_baseline():
         num_boost_round = self.CFG['num_boost_round']
         only_first_fold = self.CFG['OPTUNA_only_first_fold']
         early_stopping = self.CFG['OPTUNA_early_stopping_rounds']
+        boosting_type = self.CFG['OPTUNA_boosting_type']
 
         self.STDOUT('[Optuna parameter tuning]')
         kf = StratifiedKFold(n_splits=5)
@@ -154,8 +159,6 @@ class LGBM_baseline():
                 dvalid = lgb.Dataset(valid_x, label=valid_y)
 
                 param = {
-                    'objective': 'binary',
-                    'metric': 'custom',
                     'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
                     'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
                     'num_leaves': trial.suggest_int('num_leaves', 100, 400),
@@ -165,13 +168,15 @@ class LGBM_baseline():
                     #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
                     'max_depth': trial.suggest_int('max_depth', 3, 8),
                     'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
-                    'force_col_wise': True
+                    'force_col_wise': True,
+                    'boosting' : boosting_type
                 }
         
                 gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
                                 num_boost_round=num_boost_round,
                                 early_stopping_rounds=early_stopping,
                                 verbose_eval=False,
+                                boosting=boosting_type, 
                                 feval = [custom_accuracy])
                 preds = gbm.predict(valid_x)
                 score = amex_metric(valid_y, preds)
@@ -195,6 +200,7 @@ class LGBM_baseline():
         num_boost_round = self.CFG['num_boost_round']
         only_first_fold = self.CFG['only_first_fold']
         early_stopping = self.CFG['early_stopping_rounds']
+        boosting_type = self.CFG['boosting_type']
         score_list = []
         kf = StratifiedKFold(n_splits=5)
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):

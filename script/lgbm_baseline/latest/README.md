@@ -35,3 +35,10 @@ custom_params : {
   max_bins : 511,
 } 
 ```
+
+### 7/11
+lightGBN のboosting_typeオプションを指定できるようにした。Config.ymlに
+```
+boosting_type : gbdt # gbdt(default), rf, dart, goss
+```
+などと書いて使用する。

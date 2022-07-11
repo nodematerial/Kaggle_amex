@@ -9,6 +9,7 @@ label_pth : ../../../data/raw/train_labels.csv
 
 # Optuna settings
 use_optuna : False
+OPTUNA_boosting_type : dart # gbdt(default), rf, dart, goss
 OPTUNA_num_trial : 100
 OPTUNA_num_boost_round : 300
 OPTUNA_early_stopping_rounds : 50
@@ -16,12 +17,13 @@ OPTUNA_only_first_fold : True
 
 # Model training settings
 eval_interval : 10 # model_trainのevalを何エポック毎に出力するか
+boosting_type : gbdt # gbdt(default), rf, dart, goss
 num_boost_round : 1800
 early_stopping_rounds : 300
 only_first_fold : False
 
 # Custom param settings ※ use_optuna を On にしていた場合、こちらが優先して使われる。
-use_custom_params : False
+use_custom_params : True
 custom_params : {
   learning_rate : 0.03, 
   reg_lambda : 50,
