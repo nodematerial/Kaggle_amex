@@ -18,6 +18,7 @@ class Period_Basic_Stat(Feature):
 
     def create_features(self, df):
         # FEATURE ENGINEERING FROM 
+        df['S_2'] = pd.to_datetime(df['S_2'])
         all_cols = [c for c in list(df.columns) if c not in ['customer_ID','S_2' , 'target']]
         cat_features = ["B_30","B_38","D_114","D_116","D_117","D_120","D_126","D_63","D_64","D_66","D_68"]
         num_features = [col for col in all_cols if col not in cat_features]

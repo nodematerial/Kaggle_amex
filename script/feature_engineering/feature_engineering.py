@@ -22,8 +22,8 @@ class Feature():
         
     def get_dataset(self):
         #データの読み込み
-        self.train_df = pd.read_feather(self.parent + self.raw_pth + 'train_data.ftr')
-        self.test_df  = pd.read_feather(self.parent + self.raw_pth + 'test_data.ftr')
+        self.train_df = pd.read_parquet(self.parent + self.raw_pth + 'train.parquet')
+        self.test_df  = pd.read_parquet(self.parent + self.raw_pth + 'test.parquet')
         return self.train_df, self.test_df
         
         
@@ -48,7 +48,7 @@ class Feature():
         print('creating train features...')
         df_processed , columns = self.create_features(self.train_df)
         print('finished!')
-        df_processed           = reduce_mem_usage(df = df_processed)
+        #df_processed           = reduce_mem_usage(df = df_processed)
         print('saving train features...')
         for col in columns:
             self.save(df_processed , col ,'train')
@@ -56,7 +56,7 @@ class Feature():
         print('creating test features...')
         df_processed , columns = self.create_features(self.test_df)
         print('finished!')
-        df_processed           = reduce_mem_usage(df = df_processed)
+        #df_processed           = reduce_mem_usage(df = df_processed)
         print('saving test features...')
         for col in columns:
             self.save(df_processed , col ,'test')
