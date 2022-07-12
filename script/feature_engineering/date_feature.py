@@ -18,7 +18,6 @@ class Date(Feature):
 
     def create_features(self, df):
         # FEATURE ENGINEERING FROM 
-
         df['S_2'] = pd.to_datetime(df['S_2'])
         last_df = df.groupby('customer_ID')['S_2'].last().reset_index()
         first_df = df.groupby('customer_ID')['S_2'].first().reset_index()
