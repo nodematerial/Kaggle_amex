@@ -21,6 +21,7 @@ boosting_type : gbdt # gbdt(default), rf, dart, goss
 num_boost_round : 1800
 early_stopping_rounds : 300
 only_first_fold : False
+show_importance : True
 
 # Custom param settings ※ use_optuna を On にしていた場合、こちらが優先して使われる。
 use_custom_params : True

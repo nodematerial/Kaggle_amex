@@ -37,8 +37,15 @@ custom_params : {
 ```
 
 ### 7/11
-lightGBN のboosting_typeオプションを指定できるようにした。Config.ymlに
+lightGBM のboosting_typeオプションを指定できるようにした。Config.ymlに
 ```
 boosting_type : gbdt # gbdt(default), rf, dart, goss
 ```
 などと書いて使用する。
+
+### 7/13
+config から feature importance の設定が行えるように変更した
+```
+show_importance : True
+```
+とすれば出力フォルダにfeature importance の一覧がcsvにて出力される。

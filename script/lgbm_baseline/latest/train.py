@@ -222,6 +222,12 @@ class LGBM_baseline():
             score_list.append(score)
             file = self.output_dir + f'/model_fold{fold}.pkl'
             pickle.dump(gbm, open(file, 'wb'))
+
+            if self.CFG['show_importance']:
+                importance = pd.DataFrame(gbm.feature_importance(), index=self.features, 
+                                          columns=['importance']).sort_values('importance',ascending=False)
+                importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')           
+
             if only_first_fold: break 
 
         self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
