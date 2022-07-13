@@ -70,7 +70,6 @@ class LGBM_baseline():
             assert type(CFG['custom_params']) is dict
             self.best_params = CFG['custom_params']
         self.best_params['force_col_wise'] = True
-        self.best_params['boosting'] = CFG['boosting_type']
 
         self.STDOUT(f'[ USING CUSTOM PARAMS ]')
         self.STDOUT('=' * 30)
@@ -137,7 +136,7 @@ class LGBM_baseline():
 
     def tuning(self) -> dict:
         num_trial = self.CFG['OPTUNA_num_trial']
-        num_boost_round = self.CFG['num_boost_round']
+        num_boost_round = self.CFG['OPTUNA_num_boost_round']
         only_first_fold = self.CFG['OPTUNA_only_first_fold']
         early_stopping = self.CFG['OPTUNA_early_stopping_rounds']
         boosting_type = self.CFG['OPTUNA_boosting_type']
@@ -162,11 +161,11 @@ class LGBM_baseline():
                     'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
                     'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
                     'num_leaves': trial.suggest_int('num_leaves', 100, 400),
-                    'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
-                    #'feature_fraction': trial.suggest_uniform('feature_fraction', 0.4, 1.0),
+                    #'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
+                    'feature_fraction': trial.suggest_uniform('feature_fraction', 0.1, 0.4),
                     #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
                     #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
-                    'max_depth': trial.suggest_int('max_depth', 3, 8),
+                    #'max_depth': trial.suggest_int('max_depth', 3, 8),
                     'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
                     'force_col_wise': True,
                     'boosting' : boosting_type
@@ -176,7 +175,6 @@ class LGBM_baseline():
                                 num_boost_round=num_boost_round,
                                 early_stopping_rounds=early_stopping,
                                 verbose_eval=False,
-                                boosting=boosting_type, 
                                 feval = [custom_accuracy])
                 preds = gbm.predict(valid_x)
                 score = amex_metric(valid_y, preds)
@@ -197,7 +195,6 @@ class LGBM_baseline():
 
     def train_model(self) -> None:
         eval_interval = self.CFG['eval_interval']
-        num_boost_round = self.CFG['num_boost_round']
         only_first_fold = self.CFG['only_first_fold']
         early_stopping = self.CFG['early_stopping_rounds']
         boosting_type = self.CFG['boosting_type']
@@ -212,8 +209,6 @@ class LGBM_baseline():
             dvalid = lgb.Dataset(valid_x, label=valid_y)
 
             gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
-                            num_boost_round=num_boost_round,
-                            early_stopping_rounds=early_stopping,
                             callbacks=[lgb.log_evaluation(eval_interval)],
                             feval = [custom_accuracy])
 
