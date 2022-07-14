@@ -49,3 +49,11 @@ config から feature importance の設定が行えるように変更した
 show_importance : True
 ```
 とすれば出力フォルダにfeature importance の一覧がcsvにて出力される。
+
+### 7/14
+Out of fold の予測値を feature 形式で出力できるようにした。
+生値に加えて、threshold = 0.9, 0.8, 0.7, 0.6, 0.5 を用いた二値分類を行えるようにしている。
+Config.yml より、以下のように指定する。
+```
+create_oofs : True
+```
