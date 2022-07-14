@@ -57,3 +57,28 @@ Config.yml より、以下のように指定する。
 ```
 create_oofs : True
 ```
+
+コードのわかり易さを向上させるため、lightGBMのパラメータの指定方法を変更した。
+今までは、config.yml内のパラメータ:use_custom_paramsの指定は任意であったが、
+名前をtraining_paramsと改め、指定を必須にしている。
+また、use_optunaをtrueにした場合には、Optunaによってチューニングされたパラメータが
+training_paramsで指定されていなければ、新たに追加され、既に指定されていた場合は
+チューニングパラメータによって上書きされる。
+
+```
+#before_optuna        →      #after_optuna
+objective : binary           objective : binary　
+metric : custom              metric : custom　
+n_estimators : 1000          n_estimators : 1000
+early_stopping_round : 50    early_stopping_round : 50　　
+seed : 42                    seed : 42　　
+boosting : gbdt              boosting : gbdt　
+learning_rate : 0.05         learning_rate : 0.05
+min_child_samples : 2400     min_child_samples : 272
+num_leaves : 100             num_leaves : 134　
+max_bins : 511               max_bins : 511
+force_col_wise : True        force_col_wise : True
+                             lambda_l1 : 7.460526006830761e-05
+                             lambda_l2 : 0.012092870767817824
+                             feature_fraction : 0.11926294640739502
+'''

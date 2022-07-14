@@ -63,15 +63,16 @@ class LGBM_baseline():
         self.train = self.create_train()
         self.target = self.create_target()
         self.features = self.train.columns
-        self.best_params =  {'objective': 'binary', 'metric': 'custom'}
+        assert type(CFG['training_params']) is dict
+        self.best_params = CFG['training_params']
         if CFG['use_optuna']:
-            self.best_params = self.tuning()
-        if CFG['use_custom_params']:
-            assert type(CFG['custom_params']) is dict
-            self.best_params = CFG['custom_params']
-        self.best_params['force_col_wise'] = True
+            optuna_params = self.tuning()
+            for key, value in optuna_params.items():
+                self.best_params[key] = value
 
-        self.STDOUT(f'[ USING CUSTOM PARAMS ]')
+        self.STDOUT(f'[ TRAINING PARAMS ]')
+        if CFG['use_optuna']:
+            self.STDOUT(f'params are gained from OPTUNA')
         self.STDOUT('=' * 30)
         for key, value in self.best_params.items():
             self.STDOUT(f'{key} : {value}')
@@ -126,7 +127,7 @@ class LGBM_baseline():
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
                 df_dict[one_df.name] = one_df.values
-                self.STDOUT(f'loading : {name} of {dirname}')
+                print(f'loading : {name} of {dirname}')
         df = pd.DataFrame(df_dict)
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
         return df
@@ -162,6 +163,8 @@ class LGBM_baseline():
                 dvalid = lgb.Dataset(valid_x, label=valid_y)
 
                 param = {
+                    'objective': 'binary', 
+                    'metric': 'custom',
                     'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
                     'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
                     'num_leaves': trial.suggest_int('num_leaves', 100, 400),
