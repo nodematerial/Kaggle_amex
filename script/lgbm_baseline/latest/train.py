@@ -118,6 +118,9 @@ class LGBM_baseline():
                         for line in f:
                             feature_name.append(line.rstrip("\n"))
 
+            # oofを生成する都合でcustomer_id を入れる
+            feature_name.insert(0, 'customer_ID')
+
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
@@ -150,8 +153,8 @@ class LGBM_baseline():
             self.STDOUT(f'[ Trial {trial._trial_id} Start ]')
 
             for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
-                train_x = self.train.iloc[idx_tr][self.features]
-                valid_x = self.train.iloc[idx_va][self.features]
+                train_x = self.train.iloc[idx_tr][self.features[1:]]
+                valid_x = self.train.iloc[idx_va][self.features[1:]]
                 train_y = self.target[idx_tr]
                 valid_y = self.target[idx_va]
                 dtrain = lgb.Dataset(train_x, label=train_y)
@@ -196,34 +199,64 @@ class LGBM_baseline():
     def train_model(self) -> None:
         eval_interval = self.CFG['eval_interval']
         only_first_fold = self.CFG['only_first_fold']
-        early_stopping = self.CFG['early_stopping_rounds']
-        boosting_type = self.CFG['boosting_type']
         score_list = []
         kf = StratifiedKFold(n_splits=5)
+        oofs = []
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
             train_x = self.train.iloc[idx_tr][self.features]
             valid_x = self.train.iloc[idx_va][self.features]
             train_y = self.target[idx_tr]
             valid_y = self.target[idx_va]
-            dtrain = lgb.Dataset(train_x, label=train_y)
-            dvalid = lgb.Dataset(valid_x, label=valid_y)
+            dtrain = lgb.Dataset(train_x.drop(columns = 'customer_ID'), label=train_y)
+            dvalid = lgb.Dataset(valid_x.drop(columns = 'customer_ID'), label=valid_y)
 
             gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
                             callbacks=[lgb.log_evaluation(eval_interval)],
                             feval = [custom_accuracy])
 
-            preds = gbm.predict(valid_x)
+            preds = gbm.predict(valid_x.drop(columns = 'customer_ID'))
             score = amex_metric(valid_y, preds)
             score_list.append(score)
+            # saving models
             file = self.output_dir + f'/model_fold{fold}.pkl'
             pickle.dump(gbm, open(file, 'wb'))
 
+            # creating oof predictions
+            preds_df = pd.DataFrame(preds, columns = ['predicted'])
+            preds_09 = pd.DataFrame(np.where(preds > 0.9, 1, 0), columns = ['predicted_09'])
+            preds_08 = pd.DataFrame(np.where(preds > 0.8, 1, 0), columns = ['predicted_08'])
+            preds_07 = pd.DataFrame(np.where(preds > 0.7, 1, 0), columns = ['predicted_07'])
+            preds_06 = pd.DataFrame(np.where(preds > 0.6, 1, 0), columns = ['predicted_06'])
+            preds_05 = pd.DataFrame(np.where(preds > 0.5, 1, 0), columns = ['predicted_05'])
+            oof = pd.concat([valid_x.reset_index(drop = True), preds_df, preds_09,
+                            preds_08, preds_07, preds_06, preds_05], axis = 1)
+            oof['fold'] = fold
+            oofs.append(oof)
+
             if self.CFG['show_importance']:
-                importance = pd.DataFrame(gbm.feature_importance(), index=self.features, 
+                importance = pd.DataFrame(gbm.feature_importance(), index=self.features[1:], 
                                           columns=['importance']).sort_values('importance',ascending=False)
                 importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')           
 
             if only_first_fold: break 
+        
+        # saving oofs
+        if self.CFG['create_oofs']:
+            oofs = pd.concat(oofs).reset_index()
+            oofs.to_feather(self.output_dir + '/oofs.ftr')
+            self.STDOUT('=' * 30)
+            self.STDOUT('OOFs Info')
+            f, t = oofs['predicted_09'].value_counts()
+            self.STDOUT(f'threshold 0.9  True:{t} False:{f}')
+            f, t = oofs['predicted_08'].value_counts()
+            self.STDOUT(f'threshold 0.8  True:{t} False:{f}')
+            f, t = oofs['predicted_07'].value_counts()
+            self.STDOUT(f'threshold 0.7  True:{t} False:{f}')
+            f, t = oofs['predicted_06'].value_counts()
+            self.STDOUT(f'threshold 0.6  True:{t} False:{f}')
+            f, t = oofs['predicted_05'].value_counts()
+            self.STDOUT(f'threshold 0.5  True:{t} False:{f}')
+            self.STDOUT('=' * 30)
 
         self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
 
