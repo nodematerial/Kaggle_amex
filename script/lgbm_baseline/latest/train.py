@@ -119,7 +119,8 @@ class LGBM_baseline():
                             feature_name.append(line.rstrip("\n"))
 
             # oofを生成する都合でcustomer_id を入れる
-            feature_name.insert(0, 'customer_ID')
+            if dirname == 'Basic_Stat':
+                feature_name.insert(0, 'customer_ID')
 
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
