@@ -8,10 +8,10 @@ feature_groups_path : ../../../data/feature_groups
 label_pth : ../../../data/raw/train_labels.csv
 
 # Optuna settings
-use_optuna : True
-OPTUNA_num_trial : 100
-OPTUNA_num_boost_round : 3000
-OPTUNA_early_stopping_rounds : 100
+use_optuna : False
+OPTUNA_num_trial : 2
+OPTUNA_num_boost_round : 500
+OPTUNA_early_stopping_rounds : 50
 OPTUNA_only_first_fold : True
 OPTUNA_GPU : True
 
@@ -23,17 +23,21 @@ create_oofs : True
 focal_loss : False
 
 # params
-training_params :  {
-  iterations : 10000,                         
-  depth : 6,                                       
-  learning_rate : 0.01,
-  random_strength : 10,                       
-  bagging_temperature : 1, 
-  verbose : True,
-  allow_writing_files : False,
-  early_stopping_rounds : 100,  
-  task_type : GPU,
-  eval_metric : Logloss 
+training_params : {
+    n_estimators : 10000,
+    early_stopping_rounds : 500,
+    eval_metric: logloss,
+    objective : binary:logistic,
+    booster : gbtree,
+    learning_rate : 0.01,
+    tree_method : gpu_hist, 
+    predictor : gpu_predictor,
+    enable_categorical : True,
+    random_state : 42, 
+    # optuna params
+    max_depth : 4, 
+    subsample : 0.8,
+    colsample_bytree : 0.6, 
 }
 
 # Feature selection settings
@@ -41,7 +45,7 @@ training_params :  {
 using_features : {
   Basic_Stat : all,
   Period_Basic_Stat : all,
-  Date              : all,
+  Date : all,
   Last_mean_diff : all,
   Lag_diff : all
 }
