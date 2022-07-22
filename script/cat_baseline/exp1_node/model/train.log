@@ -1,0 +1,17 @@
+dataframe_info:  458913 rows, 3935 features
+used categorical_features : ['B_30_last', 'B_38_last', 'D_114_last', 'D_116_last', 'D_117_last', 'D_120_last', 'D_126_last', 'D_63_last', 'D_64_last', 'D_66_last', 'D_68_last']
+dataframe_info:  458913 rows, 3935 features
+used categorical_features : ['B_30_last', 'B_38_last', 'D_114_last', 'D_116_last', 'D_117_last', 'D_120_last', 'D_126_last', 'D_63_last', 'D_64_last', 'D_66_last', 'D_68_last']
+[ TRAINING PARAMS ]
+==============================
+iterations : 12000
+depth : 6
+learning_rate : 0.01
+random_strength : 10
+bagging_temperature : 1
+verbose : True
+allow_writing_files : False
+early_stopping_rounds : 500
+task_type : GPU
+eval_metric : Logloss
+==============================
