@@ -238,12 +238,11 @@ class CAT_baseline():
 
             # creating oof predictions
             preds_df = pd.DataFrame(preds, columns = ['predicted'])
-            preds_09 = pd.DataFrame(np.where(preds > 0.9, 1, 0), columns = ['predicted_09'])
             preds_08 = pd.DataFrame(np.where(preds > 0.8, 1, 0), columns = ['predicted_08'])
             preds_07 = pd.DataFrame(np.where(preds > 0.7, 1, 0), columns = ['predicted_07'])
-            preds_06 = pd.DataFrame(np.where(preds > 0.6, 1, 0), columns = ['predicted_6'])
+            preds_06 = pd.DataFrame(np.where(preds > 0.6, 1, 0), columns = ['predicted_06'])
             preds_05 = pd.DataFrame(np.where(preds > 0.5, 1, 0), columns = ['predicted_05'])
-            oof = pd.concat([valid_x.reset_index(drop = True), preds_df, preds_09,
+            oof = pd.concat([valid_x.reset_index(drop = True), preds_df,
                             preds_08, preds_07, preds_06, preds_05], axis = 1)
             oof['fold'] = fold
             oofs.append(oof)
@@ -261,8 +260,6 @@ class CAT_baseline():
             oofs.to_feather(self.output_dir + '/oofs.ftr')
             self.STDOUT('=' * 30)
             self.STDOUT('OOFs Info')
-            f, t = oofs['predicted_09'].value_counts()
-            self.STDOUT(f'threshold 0.9  True:{t} False:{f}')
             f, t = oofs['predicted_08'].value_counts()
             self.STDOUT(f'threshold 0.8  True:{t} False:{f}')
             f, t = oofs['predicted_07'].value_counts()

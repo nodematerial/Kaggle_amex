@@ -24,14 +24,14 @@ focal_loss : False
 
 # params
 training_params :  {
-  iterations : 12000,                         
+  iterations : 12000,
   depth : 6,                                       
   learning_rate : 0.01,
   random_strength : 10,                       
   bagging_temperature : 1, 
   verbose : True,
   allow_writing_files : False,
-  early_stopping_rounds : 500,  
+  early_stopping_rounds : 1000,  
   task_type : GPU,
   eval_metric : Logloss 
 }

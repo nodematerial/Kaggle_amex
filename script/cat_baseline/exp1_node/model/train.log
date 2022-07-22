@@ -11,7 +11,9 @@ random_strength : 10
 bagging_temperature : 1
 verbose : True
 allow_writing_files : False
-early_stopping_rounds : 500
+early_stopping_rounds : 1000
 task_type : GPU
 eval_metric : Logloss
 ==============================
+fold 0 score: 0.7955
+fold 1 score: 0.7902
