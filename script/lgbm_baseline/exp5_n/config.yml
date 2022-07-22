@@ -8,33 +8,34 @@ feature_groups_path : ../../../data/feature_groups
 label_pth : ../../../data/raw/train_labels.csv
 
 # Optuna settings
-use_optuna : True
-OPTUNA_num_trial : 2000
-OPTUNA_num_boost_round : 100
+use_optuna : False
+OPTUNA_boosting_type : gbdt # gbdt(default), rf, dart, goss
+OPTUNA_num_trial : 100
+OPTUNA_num_boost_round : 1600
 OPTUNA_early_stopping_rounds : 100
-OPTUNA_only_first_fold : True
-OPTUNA_GPU : True
+OPTUNA_only_first_fold : True 
 
 # Model training settings
 eval_interval : 10 # model_trainのevalを何エポック毎に出力するか
 only_first_fold : False
 show_importance : True
 create_oofs : True
-focal_loss : False
 
 # params
-training_params :  {
-  iterations : 10000,                         
-  depth : 6,                                       
-  learning_rate : 0.01,
-  random_strength : 10,                       
-  bagging_temperature : 1, 
-  verbose : True,
-  allow_writing_files : False,
-  early_stopping_rounds : 100,  
-  task_type : GPU,
-  eval_metric : Logloss 
-}
+training_params : {
+  objective: binary, 
+  metric: custom, 
+  n_estimators : 1000,
+  early_stopping_round : 1000,
+  seed : 42,
+  boosting : gbdt, # gbdt(default), rf, dart, goss
+  learning_rate : 0.005, 
+  min_child_samples : 2400,
+  num_leaves : 100,
+  max_bins : 511,
+  force_col_wise : True
+} 
+# from https://www.kaggle.com/code/ambrosm/amex-lightgbm-quickstart
 
 # Feature selection settings
 # value に allと設定した場合、全ての特徴量が使用される
@@ -45,6 +46,3 @@ using_features : {
   Last_mean_diff : all,
   Lag_diff : all
 }
-
-categorical : ['B_30_last', 'B_38_last', 'D_114_last', 'D_116_last', 'D_117_last', 
-               'D_120_last', 'D_126_last', 'D_63_last', 'D_64_last', 'D_66_last', 'D_68_last']

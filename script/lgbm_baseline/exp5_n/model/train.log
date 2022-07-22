@@ -1,0 +1,284 @@
+dataframe_info:  458913 rows, 1273 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : custom
+n_estimators : 1000
+early_stopping_round : 50
+seed : 42
+boosting : gbdt
+learning_rate : 0.05
+min_child_samples : 2400
+num_leaves : 100
+max_bins : 511
+force_col_wise : True
+==============================
+dataframe_info:  458913 rows, 1273 features
+[Optuna parameter tuning]
+[ Trial 0 Start ]
+CV Score | 00:35 | Score = 0.78714
+{'lambda_l1': 1.1468120797486204e-08, 'lambda_l2': 2.3026457077762635e-08, 'num_leaves': 187, 'feature_fraction': 0.1270621842872345, 'min_child_samples': 1937}
+[ TRAINING PARAMS ]
+params are gained from OPTUNA
+==============================
+objective : binary
+metric : custom
+n_estimators : 1000
+early_stopping_round : 50
+seed : 42
+boosting : gbdt
+learning_rate : 0.05
+min_child_samples : 1937
+num_leaves : 187
+max_bins : 511
+force_col_wise : True
+lambda_l1 : 1.1468120797486204e-08
+lambda_l2 : 2.3026457077762635e-08
+feature_fraction : 0.1270621842872345
+==============================
+dataframe_info:  458913 rows, 3935 features
+[Optuna parameter tuning]
+[ Trial 0 Start ]
+CV Score | 03:07 | Score = 0.78875
+[ Trial 1 Start ]
+CV Score | 02:51 | Score = 0.78924
+[ Trial 2 Start ]
+CV Score | 06:17 | Score = 0.78823
+[ Trial 3 Start ]
+CV Score | 02:33 | Score = 0.78890
+[ Trial 4 Start ]
+CV Score | 03:50 | Score = 0.78883
+[ Trial 5 Start ]
+CV Score | 03:48 | Score = 0.78950
+[ Trial 6 Start ]
+CV Score | 03:37 | Score = 0.79003
+[ Trial 7 Start ]
+CV Score | 02:21 | Score = 0.78990
+[ Trial 8 Start ]
+CV Score | 03:36 | Score = 0.79086
+[ Trial 9 Start ]
+CV Score | 03:15 | Score = 0.79029
+[ Trial 10 Start ]
+CV Score | 03:44 | Score = 0.78882
+[ Trial 11 Start ]
+CV Score | 02:29 | Score = 0.78942
+[ Trial 12 Start ]
+CV Score | 02:55 | Score = 0.78961
+[ Trial 13 Start ]
+CV Score | 02:32 | Score = 0.78874
+[ Trial 14 Start ]
+CV Score | 03:02 | Score = 0.79189
+[ Trial 15 Start ]
+CV Score | 01:58 | Score = 0.79077
+[ Trial 16 Start ]
+CV Score | 03:04 | Score = 0.79058
+[ Trial 17 Start ]
+CV Score | 04:08 | Score = 0.79027
+[ Trial 18 Start ]
+CV Score | 04:27 | Score = 0.78926
+[ Trial 19 Start ]
+CV Score | 03:40 | Score = 0.78895
+[ Trial 20 Start ]
+CV Score | 03:21 | Score = 0.79133
+[ Trial 21 Start ]
+CV Score | 04:10 | Score = 0.79061
+[ Trial 22 Start ]
+CV Score | 03:23 | Score = 0.78926
+[ Trial 23 Start ]
+CV Score | 03:36 | Score = 0.78918
+[ Trial 24 Start ]
+CV Score | 03:59 | Score = 0.78969
+[ Trial 25 Start ]
+CV Score | 03:31 | Score = 0.78841
+[ Trial 26 Start ]
+CV Score | 03:29 | Score = 0.78814
+[ Trial 27 Start ]
+CV Score | 03:03 | Score = 0.78794
+[ Trial 28 Start ]
+CV Score | 03:02 | Score = 0.79179
+[ Trial 29 Start ]
+CV Score | 03:07 | Score = 0.78973
+[ Trial 30 Start ]
+CV Score | 03:01 | Score = 0.78971
+[ Trial 31 Start ]
+CV Score | 03:21 | Score = 0.78992
+[ Trial 32 Start ]
+CV Score | 02:57 | Score = 0.78888
+[ Trial 33 Start ]
+CV Score | 02:44 | Score = 0.79025
+[ Trial 34 Start ]
+CV Score | 02:56 | Score = 0.78781
+[ Trial 35 Start ]
+CV Score | 04:51 | Score = 0.78970
+[ Trial 36 Start ]
+CV Score | 02:38 | Score = 0.78917
+[ Trial 37 Start ]
+CV Score | 03:41 | Score = 0.78936
+[ Trial 38 Start ]
+CV Score | 02:50 | Score = 0.79010
+[ Trial 39 Start ]
+CV Score | 02:50 | Score = 0.78774
+[ Trial 40 Start ]
+CV Score | 03:15 | Score = 0.78942
+[ Trial 41 Start ]
+CV Score | 03:06 | Score = 0.79040
+[ Trial 42 Start ]
+CV Score | 01:51 | Score = 0.79039
+[ Trial 43 Start ]
+CV Score | 02:21 | Score = 0.78913
+[ Trial 44 Start ]
+CV Score | 02:20 | Score = 0.78957
+[ Trial 45 Start ]
+CV Score | 01:51 | Score = 0.78958
+[ Trial 46 Start ]
+CV Score | 03:38 | Score = 0.78907
+[ Trial 47 Start ]
+CV Score | 03:04 | Score = 0.79023
+[ Trial 48 Start ]
+CV Score | 04:05 | Score = 0.79037
+[ Trial 49 Start ]
+CV Score | 02:58 | Score = 0.78942
+[ Trial 50 Start ]
+CV Score | 02:20 | Score = 0.78900
+[ Trial 51 Start ]
+CV Score | 02:37 | Score = 0.79005
+[ Trial 52 Start ]
+CV Score | 02:48 | Score = 0.78989
+[ Trial 53 Start ]
+CV Score | 03:30 | Score = 0.79189
+[ Trial 54 Start ]
+CV Score | 04:06 | Score = 0.78939
+[ Trial 55 Start ]
+CV Score | 03:53 | Score = 0.78879
+[ Trial 56 Start ]
+CV Score | 03:46 | Score = 0.78953
+[ Trial 57 Start ]
+CV Score | 02:42 | Score = 0.79041
+[ Trial 58 Start ]
+CV Score | 03:53 | Score = 0.78857
+[ Trial 59 Start ]
+CV Score | 02:56 | Score = 0.79046
+[ Trial 60 Start ]
+CV Score | 02:57 | Score = 0.79074
+[ Trial 61 Start ]
+CV Score | 02:37 | Score = 0.78858
+[ Trial 62 Start ]
+CV Score | 02:30 | Score = 0.78917
+[ Trial 63 Start ]
+CV Score | 04:09 | Score = 0.78793
+[ Trial 64 Start ]
+CV Score | 02:54 | Score = 0.78963
+[ Trial 65 Start ]
+CV Score | 03:00 | Score = 0.78874
+[ Trial 66 Start ]
+CV Score | 03:47 | Score = 0.78779
+[ Trial 67 Start ]
+CV Score | 03:44 | Score = 0.78787
+[ Trial 68 Start ]
+CV Score | 03:28 | Score = 0.78745
+[ Trial 69 Start ]
+CV Score | 02:35 | Score = 0.79168
+[ Trial 70 Start ]
+CV Score | 02:19 | Score = 0.78985
+[ Trial 71 Start ]
+CV Score | 02:57 | Score = 0.79117
+[ Trial 72 Start ]
+CV Score | 02:58 | Score = 0.78857
+[ Trial 73 Start ]
+CV Score | 02:45 | Score = 0.79089
+[ Trial 74 Start ]
+CV Score | 03:55 | Score = 0.79099
+[ Trial 75 Start ]
+CV Score | 02:57 | Score = 0.79111
+[ Trial 76 Start ]
+CV Score | 03:10 | Score = 0.78922
+[ Trial 77 Start ]
+CV Score | 03:21 | Score = 0.78982
+[ Trial 78 Start ]
+CV Score | 02:36 | Score = 0.78859
+[ Trial 79 Start ]
+CV Score | 03:41 | Score = 0.78934
+[ Trial 80 Start ]
+CV Score | 03:17 | Score = 0.78756
+[ Trial 81 Start ]
+CV Score | 03:03 | Score = 0.79061
+[ Trial 82 Start ]
+CV Score | 03:00 | Score = 0.79113
+[ Trial 83 Start ]
+CV Score | 03:30 | Score = 0.79098
+[ Trial 84 Start ]
+CV Score | 03:11 | Score = 0.78938
+[ Trial 85 Start ]
+CV Score | 04:18 | Score = 0.78904
+[ Trial 86 Start ]
+CV Score | 03:54 | Score = 0.79073
+[ Trial 87 Start ]
+CV Score | 02:43 | Score = 0.78921
+[ Trial 88 Start ]
+CV Score | 03:41 | Score = 0.78929
+[ Trial 89 Start ]
+CV Score | 03:56 | Score = 0.79021
+[ Trial 90 Start ]
+CV Score | 03:08 | Score = 0.78901
+[ Trial 91 Start ]
+CV Score | 02:58 | Score = 0.78931
+[ Trial 92 Start ]
+CV Score | 03:13 | Score = 0.79079
+[ Trial 93 Start ]
+CV Score | 04:12 | Score = 0.78908
+[ Trial 94 Start ]
+CV Score | 02:57 | Score = 0.78967
+[ Trial 95 Start ]
+CV Score | 03:01 | Score = 0.79055
+[ Trial 96 Start ]
+CV Score | 02:52 | Score = 0.78941
+[ Trial 97 Start ]
+CV Score | 03:04 | Score = 0.78994
+[ Trial 98 Start ]
+CV Score | 02:51 | Score = 0.79076
+[ Trial 99 Start ]
+CV Score | 02:58 | Score = 0.78847
+{'lambda_l1': 0.8724605081660937, 'lambda_l2': 0.01744659196499565, 'num_leaves': 225, 'feature_fraction': 0.27513763379925, 'min_child_samples': 2459}
+[ TRAINING PARAMS ]
+params are gained from OPTUNA
+==============================
+objective : binary
+metric : custom
+n_estimators : 12000
+early_stopping_round : 1000
+seed : 42
+boosting : gbdt
+learning_rate : 0.005
+min_child_samples : 2459
+num_leaves : 225
+max_bins : 511
+force_col_wise : True
+lambda_l1 : 0.8724605081660937
+lambda_l2 : 0.01744659196499565
+feature_fraction : 0.27513763379925
+==============================
+==============================
+OOFs Info
+threshold 0.9  True:48126 False:410787
+threshold 0.8  True:72118 False:386795
+threshold 0.7  True:90008 False:368905
+threshold 0.6  True:104772 False:354141
+threshold 0.5  True:118220 False:340693
+==============================
+OOF Score: 0.79556
+successfully saved feature names
+dataframe_info:  458913 rows, 3935 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : custom
+n_estimators : 1000
+early_stopping_round : 1000
+seed : 42
+boosting : gbdt
+learning_rate : 0.005
+min_child_samples : 2400
+num_leaves : 100
+max_bins : 511
+force_col_wise : True
+==============================

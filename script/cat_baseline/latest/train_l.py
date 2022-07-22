@@ -9,7 +9,7 @@ import yaml
 
 from sklearn.model_selection import StratifiedKFold
 from utils import *
-from catboost import Pool, CatBoostClassifier
+import lightgbm as lgb
 import optuna
 
 warnings.filterwarnings('ignore')
@@ -45,7 +45,13 @@ def amex_metric(y_true: np.array, y_pred: np.array) -> float:
 
     return 0.5 * (g + d)
 
-class CAT_baseline():
+def custom_accuracy(preds, data):
+    y_true = data.get_label()
+    acc = amex_metric(y_true, preds)
+    return ('custom_accuracy', acc, True)
+
+
+class LGBM_baseline():
     def __init__(self, CFG, logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
@@ -54,8 +60,7 @@ class CAT_baseline():
         self.using_features = CFG['using_features']
         self.output_dir = CFG['output_dir']
 
-        self.train = self.create_train()[0]
-        self.categorical = self.create_train()[1]
+        self.train = self.create_train()
         self.target = self.create_target()
         self.features = self.train.columns
         assert type(CFG['training_params']) is dict
@@ -81,7 +86,7 @@ class CAT_baseline():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
                 feature_name = [os.path.splitext(os.path.basename(F))[0]
-                for F in feature_name if 'customer_ID' not in F]
+                 for F in feature_name if 'customer_ID' not in F]
 
             elif type(feature_name) == str:
                 file = self.feature_groups_path + f'/{dirname}/{feature_name}.txt'
@@ -101,7 +106,6 @@ class CAT_baseline():
 
     def create_train(self) -> pd.DataFrame:
         df_dict = {}
-        categorical_used = []
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
@@ -122,23 +126,11 @@ class CAT_baseline():
             for name in feature_name:
                 filepath = self.features_path + f'/{dirname}/train' + f'/{name}.pickle'
                 one_df = pd.read_pickle(filepath)
-                # categoricalに欠損値が入るとデータ型がおかしくなるため、最頻値で埋める
-                if name in self.CFG['categorical']:
-                    categorical_used.append(name)
-                    one_df = one_df.fillna(one_df.mode().iloc[0])
-                    try:
-                        one_df = one_df.astype('int')
-                    except:
-                        pass
-                    one_df = one_df.astype('category')
-
                 df_dict[one_df.name] = one_df.values
                 print(f'loading : {name} of {dirname}')
-
         df = pd.DataFrame(df_dict)
         self.STDOUT(f'dataframe_info:  {len(df)} rows, {len(df.columns)} features')
-        self.STDOUT(f'used categorical_features : {categorical_used}')
-        return df, categorical_used
+        return df
 
 
     def create_target(self) -> pd.Series:
@@ -152,6 +144,7 @@ class CAT_baseline():
         num_boost_round = self.CFG['OPTUNA_num_boost_round']
         only_first_fold = self.CFG['OPTUNA_only_first_fold']
         early_stopping = self.CFG['OPTUNA_early_stopping_rounds']
+        boosting_type = self.CFG['OPTUNA_boosting_type']
 
         self.STDOUT('[Optuna parameter tuning]')
         kf = StratifiedKFold(n_splits=5)
@@ -160,36 +153,37 @@ class CAT_baseline():
             score_list = []
             start_time = datetime.datetime.now()
             self.STDOUT(f'[ Trial {trial._trial_id} Start ]')
-            categorical = self.categorical
 
             for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
-                train_x = self.train.iloc[idx_tr][self.features]
-                valid_x = self.train.iloc[idx_va][self.features]
+                train_x = self.train.iloc[idx_tr][self.features[1:]]
+                valid_x = self.train.iloc[idx_va][self.features[1:]]
                 train_y = self.target[idx_tr]
                 valid_y = self.target[idx_va]
-                train_pool = Pool(train_x.drop(columns = 'customer_ID'), train_y, cat_features=categorical)
+                dtrain = lgb.Dataset(train_x, label=train_y)
+                dvalid = lgb.Dataset(valid_x, label=valid_y)
 
                 param = {
-                    'num_boost_round' :  num_boost_round,
-                    'depth' : trial.suggest_int('depth', 4, 10),              
-                    'random_strength' :trial.suggest_int('random_strength', 0, 100),                       
-                    'bagging_temperature' :trial.suggest_loguniform('bagging_temperature', 0.01, 100.00), 
-                    'verbose' : True,
-                    'allow_writing_files' : False,
-                    'early_stopping_rounds' : early_stopping,  
+                    'objective': 'binary', 
+                    'metric': 'custom',
+                    'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
+                    'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
+                    'num_leaves': trial.suggest_int('num_leaves', 100, 400),
+                    #'learning_rate': trial.suggest_uniform('learning_rate', 0.005, 0.1),
+                    'feature_fraction': trial.suggest_uniform('feature_fraction', 0.1, 0.4),
+                    #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
+                    #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
+                    #'max_depth': trial.suggest_int('max_depth', 3, 8),
+                    'min_child_samples': trial.suggest_int('min_child_samples', 100, 3000),
+                    'force_col_wise': True,
+                    'boosting' : boosting_type
                 }
-                if self.CFG['OPTUNA_GPU']:
-                    param['task_type'] = 'GPU'
-
-                if self.CFG['focal_loss']:
-                    model = CatBoostClassifier(loss_function = FocalLoss(),
-                                                eval_metric = 'Logloss',
-                                                **param)
-                else:
-                    model = CatBoostClassifier(**param)
-
-                model.fit(train_pool)
-                preds = model.predict(valid_x.drop(columns = 'customer_ID'), prediction_type='Probability')[:, 1]
+        
+                gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
+                                num_boost_round=num_boost_round,
+                                early_stopping_rounds=early_stopping,
+                                verbose_eval=False,
+                                feval = [custom_accuracy])
+                preds = gbm.predict(valid_x)
                 score = amex_metric(valid_y, preds)
                 score_list.append(score)
 
@@ -207,41 +201,36 @@ class CAT_baseline():
 
 
     def train_model(self) -> None:
+        eval_interval = self.CFG['eval_interval']
         only_first_fold = self.CFG['only_first_fold']
         score_list = []
         kf = StratifiedKFold(n_splits=5)
         oofs = []
-        categorical = self.categorical
-
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
             train_x = self.train.iloc[idx_tr][self.features]
             valid_x = self.train.iloc[idx_va][self.features]
             train_y = self.target[idx_tr]
             valid_y = self.target[idx_va]
-            train_pool = Pool(train_x.drop(columns = 'customer_ID'), train_y, cat_features=categorical)
-            valid_pool = Pool(valid_x.drop(columns = 'customer_ID'), valid_y, cat_features=categorical)
+            dtrain = lgb.Dataset(train_x.drop(columns = 'customer_ID'), label=train_y)
+            dvalid = lgb.Dataset(valid_x.drop(columns = 'customer_ID'), label=valid_y)
 
-            if self.CFG['focal_loss']:
-                self.STDOUT('#### FOCAL LOSS ####')
-                model = CatBoostClassifier(loss_function = FocalLoss(),
-                                            **self.best_params)
-            else:
-                model = CatBoostClassifier(**self.best_params)
+            gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
+                            callbacks=[lgb.log_evaluation(eval_interval)],
+                            feval = [custom_accuracy])
 
-            model.fit(train_pool, eval_set=valid_pool)
-            preds = model.predict(valid_x.drop(columns = 'customer_ID'), prediction_type='Probability')[:, 1]
+            preds = gbm.predict(valid_x.drop(columns = 'customer_ID'))
             score = amex_metric(valid_y, preds)
             score_list.append(score)
-            self.STDOUT(f'fold {fold} score: {score:.4f}')
+            # saving models
             file = self.output_dir + f'/model_fold{fold}.pkl'
-            pickle.dump(model, open(file, 'wb'))
+            pickle.dump(gbm, open(file, 'wb'))
 
             # creating oof predictions
             preds_df = pd.DataFrame(preds, columns = ['predicted'])
             preds_09 = pd.DataFrame(np.where(preds > 0.9, 1, 0), columns = ['predicted_09'])
             preds_08 = pd.DataFrame(np.where(preds > 0.8, 1, 0), columns = ['predicted_08'])
             preds_07 = pd.DataFrame(np.where(preds > 0.7, 1, 0), columns = ['predicted_07'])
-            preds_06 = pd.DataFrame(np.where(preds > 0.6, 1, 0), columns = ['predicted_6'])
+            preds_06 = pd.DataFrame(np.where(preds > 0.6, 1, 0), columns = ['predicted_06'])
             preds_05 = pd.DataFrame(np.where(preds > 0.5, 1, 0), columns = ['predicted_05'])
             oof = pd.concat([valid_x.reset_index(drop = True), preds_df, preds_09,
                             preds_08, preds_07, preds_06, preds_05], axis = 1)
@@ -249,12 +238,12 @@ class CAT_baseline():
             oofs.append(oof)
 
             if self.CFG['show_importance']:
-                importance = pd.DataFrame(model.get_feature_importance(train_pool,
-                                        type="PredictionValuesChange"))
-                importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')     
+                importance = pd.DataFrame(gbm.feature_importance(), index=self.features[1:], 
+                                          columns=['importance']).sort_values('importance',ascending=False)
+                importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')           
 
             if only_first_fold: break 
-
+        
         # saving oofs
         if self.CFG['create_oofs']:
             oofs = pd.concat(oofs).reset_index()
@@ -273,7 +262,7 @@ class CAT_baseline():
             self.STDOUT(f'threshold 0.5  True:{t} False:{f}')
             self.STDOUT('=' * 30)
 
-        self.STDOUT(f"OOF Score: {np.mean(score_list):.4f}")
+        self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
 
 
 def main():
@@ -285,7 +274,7 @@ def main():
     if CFG['log'] == True:
         LOGGER = init_logger(log_file=CFG['output_dir']+'/train.log')
 
-    baseline = CAT_baseline(CFG, LOGGER)
+    baseline = LGBM_baseline(CFG, LOGGER)
     baseline.train_model()
     baseline.save_features()
 

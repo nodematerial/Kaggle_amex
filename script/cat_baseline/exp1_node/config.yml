@@ -8,7 +8,7 @@ feature_groups_path : ../../../data/feature_groups
 label_pth : ../../../data/raw/train_labels.csv
 
 # Optuna settings
-use_optuna : True
+use_optuna : False
 OPTUNA_num_trial : 2000
 OPTUNA_num_boost_round : 100
 OPTUNA_early_stopping_rounds : 100
@@ -24,14 +24,14 @@ focal_loss : False
 
 # params
 training_params :  {
-  iterations : 10000,                         
+  iterations : 12000,                         
   depth : 6,                                       
   learning_rate : 0.01,
   random_strength : 10,                       
   bagging_temperature : 1, 
   verbose : True,
   allow_writing_files : False,
-  early_stopping_rounds : 100,  
+  early_stopping_rounds : 500,  
   task_type : GPU,
   eval_metric : Logloss 
 }
