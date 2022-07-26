@@ -14,7 +14,7 @@ from feature_engineering import *
 #sample名
 #
 
-class Last_mean_diff(Feature):
+class Max_Min_diff(Feature):
 
     def create_features(self, df):
         # FEATURE ENGINEERING FROM 
@@ -24,12 +24,14 @@ class Last_mean_diff(Feature):
         cat_features = ["B_30","B_38","D_114","D_116","D_117","D_120","D_126","D_63","D_64","D_66","D_68"]
         num_features = [col for col in all_cols if col not in cat_features]
 
-        test_num_agg = df.groupby("customer_ID")[num_features].agg(['max','median','min' ,'mean', 'last'])
+        test_num_agg = df.groupby("customer_ID")[num_features].agg(['max','min', 'last'])
         test_num_agg.columns = ['_'.join(x) for x in test_num_agg.columns]
         
         for col in num_features:
-            test_num_agg[f'{col}_last_mean_diff']   = test_num_agg[f'{col}_last'] - test_num_agg[f'{col}_mean']
-            test_num_agg = test_num_agg.drop(columns = [f'{col}_last' , f'{col}_mean' ] )
+            test_num_agg[f'{col}_last_min_diff']    = test_num_agg[f'{col}_last'] - test_num_agg[f'{col}_min']
+            test_num_agg[f'{col}_last_max_diff']    = test_num_agg[f'{col}_last'] - test_num_agg[f'{col}_max']
+            test_num_agg[f'{col}_max_min_diff']     = test_num_agg[f'{col}_max'] - test_num_agg[f'{col}_min']
+            test_num_agg = test_num_agg.drop(columns = [f'{col}_last' , f'{col}_min', f'{col}_max'] )
         test_num_agg = test_num_agg.reset_index()
         #保存したいデータフレーム、カラムを返す
         return test_num_agg , test_num_agg.columns
@@ -37,7 +39,7 @@ class Last_mean_diff(Feature):
 
 
 def main():            
-    sample = Last_mean_diff()
+    sample = Max_Min_diff()
     sample.get_dataset()
     sample.run()
 
