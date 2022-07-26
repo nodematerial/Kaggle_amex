@@ -9,7 +9,8 @@ import yaml
 
 from sklearn.model_selection import StratifiedKFold
 from utils import *
-from catboost import Pool, CatBoostClassifier
+import xgboost as xgb
+from xgboost import XGBClassifier
 import optuna
 
 warnings.filterwarnings('ignore')
@@ -45,7 +46,7 @@ def amex_metric(y_true: np.array, y_pred: np.array) -> float:
 
     return 0.5 * (g + d)
 
-class CAT_baseline():
+class XGBoost_baseline():
     def __init__(self, CFG, logger = None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
@@ -167,29 +168,30 @@ class CAT_baseline():
                 valid_x = self.train.iloc[idx_va][self.features]
                 train_y = self.target[idx_tr]
                 valid_y = self.target[idx_va]
-                train_pool = Pool(train_x.drop(columns = 'customer_ID'), train_y, cat_features=categorical)
-
                 param = {
-                    'num_boost_round' :  num_boost_round,
-                    'depth' : trial.suggest_int('depth', 4, 10),              
-                    'random_strength' :trial.suggest_int('random_strength', 0, 100),                       
-                    'bagging_temperature' :trial.suggest_loguniform('bagging_temperature', 0.01, 100.00), 
-                    'verbose' : True,
-                    'allow_writing_files' : False,
-                    'early_stopping_rounds' : early_stopping,  
+                    'n_estimators' : num_boost_round,
+                    'early_stopping_rounds' : early_stopping,
+                    'eval_metric': 'logloss',
+                    'objective' : 'binary:logistic',
+                    'booster' : 'gbtree',
+                    'learning_rate' : 0.2,
+                    'enable_categorical' : True,
+                    'max_depth': trial.suggest_int('max_depth', 1, 9),
+                    'subsample' : trial.suggest_uniform('subsample', 0.5, 0.8),
+                    'colsample_bytree' : trial.suggest_uniform('colsample_bytree', 0.5, 0.8), 
+                    'eta' :  trial.suggest_loguniform('eta', 1e-8, 1.0),
+                    'gamma' : trial.suggest_loguniform('gamma', 1e-8, 1.0)
                 }
+
                 if self.CFG['OPTUNA_GPU']:
-                    param['task_type'] = 'GPU'
+                    param['tree_method'] = 'gpu_hist' 
+                    param['predictor'] = 'gpu_predictor'
 
-                if self.CFG['focal_loss']:
-                    model = CatBoostClassifier(loss_function = FocalLoss(),
-                                                eval_metric = 'Logloss',
-                                                **param)
-                else:
-                    model = CatBoostClassifier(**param)
+                model = XGBClassifier(**param)
 
-                model.fit(train_pool)
-                preds = model.predict(valid_x.drop(columns = 'customer_ID'), prediction_type='Probability')[:, 1]
+                eval_set = [(valid_x.drop(columns = 'customer_ID'), valid_y)]
+                model.fit(train_x.drop(columns = 'customer_ID'), train_y, eval_set = eval_set)
+                preds = model.predict_proba(valid_x.drop(columns = 'customer_ID'))[:, 1]
                 score = amex_metric(valid_y, preds)
                 score_list.append(score)
 
@@ -218,18 +220,12 @@ class CAT_baseline():
             valid_x = self.train.iloc[idx_va][self.features]
             train_y = self.target[idx_tr]
             valid_y = self.target[idx_va]
-            train_pool = Pool(train_x.drop(columns = 'customer_ID'), train_y, cat_features=categorical)
-            valid_pool = Pool(valid_x.drop(columns = 'customer_ID'), valid_y, cat_features=categorical)
 
-            if self.CFG['focal_loss']:
-                self.STDOUT('#### FOCAL LOSS ####')
-                model = CatBoostClassifier(loss_function = FocalLoss(),
-                                            **self.best_params)
-            else:
-                model = CatBoostClassifier(**self.best_params)
+            model = XGBClassifier(**self.best_params)
 
-            model.fit(train_pool, eval_set=valid_pool)
-            preds = model.predict(valid_x.drop(columns = 'customer_ID'), prediction_type='Probability')[:, 1]
+            eval_set = [(valid_x.drop(columns = 'customer_ID'), valid_y)]
+            model.fit(train_x.drop(columns = 'customer_ID'), train_y, eval_set = eval_set)
+            preds = model.predict_proba(valid_x.drop(columns = 'customer_ID'))[:, 1]
             score = amex_metric(valid_y, preds)
             score_list.append(score)
             self.STDOUT(f'fold {fold} score: {score:.4f}')
@@ -238,18 +234,18 @@ class CAT_baseline():
 
             # creating oof predictions
             preds_df = pd.DataFrame(preds, columns = ['predicted'])
+            preds_09 = pd.DataFrame(np.where(preds > 0.9, 1, 0), columns = ['predicted_09'])
             preds_08 = pd.DataFrame(np.where(preds > 0.8, 1, 0), columns = ['predicted_08'])
             preds_07 = pd.DataFrame(np.where(preds > 0.7, 1, 0), columns = ['predicted_07'])
             preds_06 = pd.DataFrame(np.where(preds > 0.6, 1, 0), columns = ['predicted_06'])
             preds_05 = pd.DataFrame(np.where(preds > 0.5, 1, 0), columns = ['predicted_05'])
-            oof = pd.concat([valid_x.reset_index(drop = True), preds_df,
+            oof = pd.concat([valid_x.reset_index(drop = True), preds_df, preds_09,
                             preds_08, preds_07, preds_06, preds_05], axis = 1)
             oof['fold'] = fold
             oofs.append(oof)
 
             if self.CFG['show_importance']:
-                importance = pd.DataFrame(model.get_feature_importance(train_pool,
-                                        type="PredictionValuesChange"))
+                importance = pd.DataFrame(model.feature_importances_)
                 importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')     
 
             if only_first_fold: break 
@@ -260,6 +256,8 @@ class CAT_baseline():
             oofs.to_feather(self.output_dir + '/oofs.ftr')
             self.STDOUT('=' * 30)
             self.STDOUT('OOFs Info')
+            f, t = oofs['predicted_09'].value_counts()
+            self.STDOUT(f'threshold 0.9  True:{t} False:{f}')
             f, t = oofs['predicted_08'].value_counts()
             self.STDOUT(f'threshold 0.8  True:{t} False:{f}')
             f, t = oofs['predicted_07'].value_counts()
@@ -282,7 +280,7 @@ def main():
     if CFG['log'] == True:
         LOGGER = init_logger(log_file=CFG['output_dir']+'/train.log')
 
-    baseline = CAT_baseline(CFG, LOGGER)
+    baseline = XGBoost_baseline(CFG, LOGGER)
     baseline.train_model()
     baseline.save_features()
 
