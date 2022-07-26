@@ -14,7 +14,7 @@ from feature_engineering import *
 #sample名
 #
 
-class Div(Feature):
+class Div_Min_Max(Feature):
 
     def create_features(self, df):
         # FEATURE ENGINEERING FROM 
@@ -22,17 +22,14 @@ class Div(Feature):
 
         cat_features = ["B_30","B_38","D_114","D_116","D_117","D_120","D_126","D_63","D_64","D_66","D_68"]
         num_features = [col for col in all_cols if col not in cat_features]
-        shift_features = [col + '_shift1' for col in num_features]
-        df[shift_features] = df.groupby("customer_ID")[num_features].shift(1)
-        test_num_agg = df.groupby("customer_ID")[num_features + shift_features].agg(['first', 'last' , 'mean' ])
+        test_num_agg = df.groupby("customer_ID")[num_features].agg(['last', 'max' , 'min'])
         test_num_agg.columns = ['_'.join(x) for x in test_num_agg.columns]
 
         for col in num_features:
-            test_num_agg[f'{col}_div_first_last'] = test_num_agg[f'{col}_first'] / test_num_agg[f'{col}_last']
-            test_num_agg[f'{col}_div_mean_last'] = test_num_agg[f'{col}_mean'] / test_num_agg[f'{col}_last']
-            test_num_agg[f'{col}_div_last1_last'] = test_num_agg[f'{col}_shift1_last'] / test_num_agg[f'{col}_last']
-            test_num_agg = test_num_agg.drop(columns = [f'{col}_last' , f'{col}_first' , f'{col}_mean'  ,
-                                                        f'{col}_shift1_first' , f'{col}_shift1_last' , f'{col}_shift1_mean'] )
+            test_num_agg[f'{col}_div_min_last'] = test_num_agg[f'{col}_min'] / test_num_agg[f'{col}_last']
+            test_num_agg[f'{col}_div_max_last'] = test_num_agg[f'{col}_max'] / test_num_agg[f'{col}_last']
+            test_num_agg[f'{col}_div_min_max'] = test_num_agg[f'{col}_min'] / test_num_agg[f'{col}_max']
+            test_num_agg = test_num_agg.drop(columns = [f'{col}_last' , f'{col}_min' , f'{col}_max'] )
         #保存したいデータフレーム、カラムを返す
         test_num_agg = test_num_agg.reset_index()
         
@@ -45,7 +42,7 @@ class Div(Feature):
 
 
 def main():            
-    sample = Div()
+    sample = Div_Min_Max()
     sample.get_dataset()
     sample.run()
 
