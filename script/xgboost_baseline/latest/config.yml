@@ -28,7 +28,7 @@ training_params : {
     early_stopping_rounds : 10,
     eval_metric: logloss,
     objective : binary:logistic,
-    booster : gbtree,
+    booster : gbtree, # gblinear or dart
     learning_rate : 0.2,
     tree_method : gpu_hist, 
     predictor : gpu_predictor,
