@@ -49,7 +49,7 @@ class LGBM_inference():
         name_a, name_b = os.path.split(os.getcwd())
         name_a = os.path.basename(name_a)
         submission = pd.read_csv(self.samplesub_path)
-        fold_prediction = submission.copy()
+        fold_prediction = submission.copy().drop('prediction', axis=1)
         submission['prediction'] = average
         for i, prediction in enumerate(output):
             fold_prediction[f'prediction_{i}'] = prediction
