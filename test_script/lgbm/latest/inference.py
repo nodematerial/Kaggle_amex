@@ -39,16 +39,21 @@ class LGBM_inference():
             with open(model_path, 'rb') as f:
                 model = pickle.load(f)
             output.append(model.predict(self.test))
-        output = np.array(output).mean(axis=0)
+        average = np.array(output).mean(axis=0)
         print('inference succeed')
-        return output
-
+        return output, average
 
     def make_csv(self):
-        output = self.infer()
+        output, average = self.infer()
+        name_a, name_b = os.path.split(os.getcwd())
+        name_a = os.path.basename(name_a)
         submission = pd.read_csv(self.samplesub_path)
-        submission['prediction'] = output
-        submission.to_csv('submission.csv', index=False)
+        fold_prediction = submission.copy()
+        submission['prediction'] = average
+        for i, prediction in enumerate(output):
+            fold_prediction[f'prediction_{i}'] = prediction
+        submission.to_csv(f'{name_a}_{name_b}_submission.csv', index=False)
+        fold_prediction.to_csv(f'{name_a}_{name_b}_predictions.csv', index=False)
 
 
 def main():

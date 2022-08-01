@@ -25,7 +25,7 @@ focal_loss : False
 # params
 training_params :  {
   iterations : 10000,                         
-  depth : 6,                                       
+  depth : 7,                                       
   learning_rate : 0.01,
   random_strength : 10,                       
   bagging_temperature : 1, 
