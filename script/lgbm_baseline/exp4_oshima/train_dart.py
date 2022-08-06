@@ -26,7 +26,7 @@ class Dart_LGBM_baseline(LGBM_baseline):
         early_stopping = self.CFG['OPTUNA_early_stopping_rounds']
 
         self.STDOUT('[Optuna parameter tuning]')
-        kf = StratifiedKFold(n_splits=5)
+        kf = StratifiedKFold(n_splits=8)
 
         def objective(trial):
             score_list = []
@@ -84,7 +84,7 @@ class Dart_LGBM_baseline(LGBM_baseline):
             eval_interval = self.CFG['eval_interval']
             only_first_fold = self.CFG['only_first_fold']
             score_list = []
-            kf = StratifiedKFold(n_splits=5)
+            kf = StratifiedKFold(n_splits=8)
             oofs = []
             for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
                 des = DartEarlyStopping("valid_0", 'custom_accuracy', 1000)
