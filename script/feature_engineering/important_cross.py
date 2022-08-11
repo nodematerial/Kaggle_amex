@@ -14,16 +14,21 @@ from feature_engineering import *
 #sample名
 #
 
-class Important_double(Feature):
+class Important_cross(Feature):
     def create_features(self, df):
         important_features = ["P_2", "B_1", "B_2", "B_3", "B_4", "B_9", "B_11", "D_39", "D_41", "D_42", "D_43", "D_44", "D_48", "S_3"]        
 
-        test_num_agg = df.groupby("customer_ID")[important_features].agg(['std', 'min', 'max', 'last'])
-        # 二乗特徴量
-        test_num_agg = test_num_agg ** 2
-        test_num_agg.columns = ['_'.join(x) + '_double'  for x in test_num_agg.columns]
+        test_num_agg = df.groupby("customer_ID")[important_features].agg(['last'])
+        df = pd.DataFrame()
+        for i in range(len(important_features)):
+            for j in range(i + 1, len(important_features)):
+                left_name = important_features[i]
+                right_name = important_features[j]
+                left_feature = test_num_agg[left_name]['last']
+                right_feature = test_num_agg[right_name]['last']
+                df[f'cross_{left_name}_{right_name}'] = left_feature * right_feature
 
-        df = test_num_agg.reset_index()
+        df = df.reset_index()
         del test_num_agg
         
         #保存したいデータフレーム、カラムを返す
@@ -31,7 +36,7 @@ class Important_double(Feature):
 
 
 def main():            
-    sample = Important_double()
+    sample = Important_cross()
     sample.get_dataset()
     sample.run()
 
