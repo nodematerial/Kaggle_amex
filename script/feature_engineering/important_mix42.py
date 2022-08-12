@@ -27,7 +27,7 @@ class Important_mix42(Feature):
                 left_feature = test_num_agg[left_name]['last']
                 right_feature = test_num_agg[right_name]['last']
                 ratio = np.random.rand()
-                df[f'mix_{left_name}_{right_name}'] = left_feature * ratio + right_feature * (1 - ratio)
+                df[f'mix_{left_name}_{right_name}_42'] = left_feature * ratio + right_feature * (1 - ratio)
 
         df = df.reset_index()
         del test_num_agg
