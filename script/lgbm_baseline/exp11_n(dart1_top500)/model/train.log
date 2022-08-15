@@ -1,0 +1,68 @@
+dataframe_info:  458913 rows, 501 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================
+dataframe_info:  458913 rows, 501 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================
+dataframe_info:  458913 rows, 301 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================
+dataframe_info:  458913 rows, 101 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================

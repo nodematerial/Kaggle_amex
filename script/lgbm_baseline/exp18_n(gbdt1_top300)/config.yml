@@ -1,0 +1,49 @@
+#log_settings
+output_dir : model
+log : True
+
+# Directory path settings
+features_path : ../../../data/feature
+feature_groups_path : ../../../data/feature_groups
+label_pth : ../../../data/raw/train_labels.csv
+
+# Optuna settings
+use_optuna : False
+OPTUNA_boosting_type : gbdt # gbdt(default), rf, dart, goss
+OPTUNA_num_trial : 100
+OPTUNA_num_boost_round : 1000
+OPTUNA_early_stopping_rounds : 100
+OPTUNA_only_first_fold : True 
+
+# Model training settings
+eval_interval : 100 # model_trainのevalを何エポック毎に出力するか
+only_first_fold : False
+show_importance : True
+create_oofs : True
+
+# params
+training_params : {
+  objective: binary, 
+  metric: custom, 
+  n_estimators : 10000,
+  early_stopping_round : 3000,
+  seed : 42,
+  boosting : gbdt, # gbdt(default), rf, dart, goss
+  learning_rate : 0.01, 
+  min_child_samples : 935,
+  num_leaves : 312,
+  #max_bins : 511,
+  force_col_wise : True,
+  lambda_l1 : 3.241752275765192e-07,
+  lambda_l2 : 2.1937785572127244e-06,
+  feature_fraction : 0.14011472322020568,
+  bagging_fraction : 0.8084821152128963,
+  bagging_freq : 16,
+  max_depth : 8,
+} 
+
+# Feature selection settings
+# value に allと設定した場合、全ての特徴量が使用される
+using_features : {
+  all_features : importance_top300,
+}

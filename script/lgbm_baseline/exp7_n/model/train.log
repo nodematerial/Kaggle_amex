@@ -1,0 +1,71 @@
+dataframe_info:  458913 rows, 239 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================
+==============================
+OOFs Info
+threshold 0.9  True:38751 False:420162
+threshold 0.8  True:62443 False:396470
+threshold 0.7  True:82511 False:376402
+threshold 0.6  True:100688 False:358225
+threshold 0.5  True:117481 False:341432
+==============================
+OOF Score: 0.77113
+successfully saved feature names
+dataframe_info:  458913 rows, 421 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================
+dataframe_info:  458913 rows, 421 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
+==============================
+==============================
+OOFs Info
+threshold 0.9  True:42812 False:416101
+threshold 0.8  True:65863 False:393050
+threshold 0.7  True:84877 False:374036
+threshold 0.6  True:101733 False:357180
+threshold 0.5  True:117365 False:341548
+==============================
+OOF Score: 0.76904
+successfully saved feature names
