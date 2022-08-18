@@ -1,4 +1,4 @@
-dataframe_info:  458913 rows, 501 features
+dataframe_info:  458913 rows, 301 features
 [ TRAINING PARAMS ]
 ==============================
 objective : binary
@@ -17,11 +17,11 @@ n_estimators : 10000
 ==============================
 ==============================
 OOFs Info
-threshold 0.9  True:43561 False:415352
-threshold 0.8  True:67713 False:391200
-threshold 0.7  True:86855 False:372058
-threshold 0.6  True:102936 False:355977
-threshold 0.5  True:117906 False:341007
+threshold 0.9  True:43313 False:415600
+threshold 0.8  True:67374 False:391539
+threshold 0.7  True:86395 False:372518
+threshold 0.6  True:102871 False:356042
+threshold 0.5  True:117838 False:341075
 ==============================
-OOF Score: 0.79482
+OOF Score: 0.79257
 successfully saved feature names

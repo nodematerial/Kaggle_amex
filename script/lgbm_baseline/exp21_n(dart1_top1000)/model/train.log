@@ -1,4 +1,4 @@
-dataframe_info:  458913 rows, 501 features
+dataframe_info:  458913 rows, 1000 features
 [ TRAINING PARAMS ]
 ==============================
 objective : binary
@@ -15,13 +15,20 @@ lambda_l2 : 2
 min_data_in_leaf' : 40
 n_estimators : 10000
 ==============================
+dataframe_info:  458913 rows, 1500 features
+[ TRAINING PARAMS ]
 ==============================
-OOFs Info
-threshold 0.9  True:43561 False:415352
-threshold 0.8  True:67713 False:391200
-threshold 0.7  True:86855 False:372058
-threshold 0.6  True:102936 False:355977
-threshold 0.5  True:117906 False:341007
+objective : binary
+metric : binary_logloss
+boosting : dart
+seed : 42
+num_leaves : 100
+learning_rate : 0.01
+feature_fraction : 0.2
+bagging_freq : 10
+bagging_fraction : 0.5
+n_jobs : -1
+lambda_l2 : 2
+min_data_in_leaf' : 40
+n_estimators : 10000
 ==============================
-OOF Score: 0.79482
-successfully saved feature names

@@ -1,0 +1,30 @@
+dataframe_info:  458913 rows, 5326 features
+[ TRAINING PARAMS ]
+==============================
+dart2 objective : binary
+metric : custom
+n_estimators : 10000
+early_stopping_round : 3000
+seed : 42
+boosting : dart
+learning_rate : 0.01
+force_col_wise : True
+lambda_l1 : 1.3885802713402106e-05
+lambda_l2 : 0.0004756476873944631
+num_leaves : 146
+feature_fraction : 0.3783431043783493
+bagging_fraction : 0.6030244532351853
+bagging_freq : 4
+max_depth : 8
+min_child_samples : 352
+==============================
+==============================
+OOFs Info
+threshold 0.9  True:44611 False:414302
+threshold 0.8  True:68092 False:390821
+threshold 0.7  True:86851 False:372062
+threshold 0.6  True:102787 False:356126
+threshold 0.5  True:117756 False:341157
+==============================
+OOF Score: 0.79810
+successfully saved feature names

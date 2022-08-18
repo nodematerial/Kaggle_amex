@@ -17,7 +17,7 @@ while read line
 do
 filename="$line.pickle"
 mv $filename tmp
-done < ../../../feature_groups/all_features/importance_top500.txt
+done < ../../../feature_groups/all_features/importance_top1500.txt
 
 cd ../test
 
@@ -25,7 +25,7 @@ while read line
 do
 filename="$line.pickle"
 mv $filename tmp
-done < ../../../feature_groups/all_features/importance_top500.txt
+done < ../../../feature_groups/all_features/importance_top1500.txt
 
 cd ..
 rm train/*
