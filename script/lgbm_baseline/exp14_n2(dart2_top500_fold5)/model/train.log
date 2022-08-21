@@ -1,7 +1,7 @@
 dataframe_info:  458913 rows, 501 features
 [ TRAINING PARAMS ]
 ==============================
-dart2 objective : binary
+objective : binary
 metric : custom
 n_estimators : 10000
 early_stopping_round : 3000
@@ -20,11 +20,11 @@ min_child_samples : 352
 ==============================
 ==============================
 OOFs Info
-threshold 0.9  True:44412 False:414501
-threshold 0.8  True:67970 False:390943
-threshold 0.7  True:86722 False:372191
-threshold 0.6  True:102786 False:356127
-threshold 0.5  True:117801 False:341112
+threshold 0.9  True:45435 False:413478
+threshold 0.8  True:68755 False:390158
+threshold 0.7  True:87364 False:371549
+threshold 0.6  True:103152 False:355761
+threshold 0.5  True:117657 False:341256
 ==============================
-OOF Score: 0.79539
+OOF Score: 0.79441
 successfully saved feature names

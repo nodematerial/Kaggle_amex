@@ -23,26 +23,27 @@ create_oofs : True
 
 # params
 training_params : {
-  dart2 objective : binary,
-  metric : custom,
+  objective: binary, 
+  metric: custom, 
   n_estimators : 10000,
   early_stopping_round : 3000,
   seed : 42,
-  boosting : dart,
-  learning_rate : 0.01,
+  boosting : gbdt, # gbdt(default), rf, dart, goss
+  learning_rate : 0.01, 
+  min_child_samples : 935,
+  num_leaves : 312,
+  #max_bins : 511,
   force_col_wise : True,
-  lambda_l1 : 1.3885802713402106e-05,
-  lambda_l2 : 0.0004756476873944631,
-  num_leaves : 146,
-  feature_fraction : 0.3783431043783493,
-  bagging_fraction : 0.6030244532351853,
-  bagging_freq : 4,
+  lambda_l1 : 3.241752275765192e-07,
+  lambda_l2 : 2.1937785572127244e-06,
+  feature_fraction : 0.14011472322020568,
+  bagging_fraction : 0.8084821152128963,
+  bagging_freq : 16,
   max_depth : 8,
-  min_child_samples : 352
-}
+} 
 
 # Feature selection settings
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
-  all_features : importance_top300,
+  all_features : importance_top1500,
 }

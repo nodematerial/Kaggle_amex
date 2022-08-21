@@ -1,0 +1,30 @@
+dataframe_info:  458913 rows, 1500 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : custom
+n_estimators : 10000
+early_stopping_round : 3000
+seed : 42
+boosting : gbdt
+learning_rate : 0.01
+min_child_samples : 935
+num_leaves : 312
+force_col_wise : True
+lambda_l1 : 3.241752275765192e-07
+lambda_l2 : 2.1937785572127244e-06
+feature_fraction : 0.14011472322020568
+bagging_fraction : 0.8084821152128963
+bagging_freq : 16
+max_depth : 8
+==============================
+==============================
+OOFs Info
+threshold 0.9  True:49811 False:409102
+threshold 0.8  True:72863 False:386050
+threshold 0.7  True:90113 False:368800
+threshold 0.6  True:104581 False:354332
+threshold 0.5  True:118014 False:340899
+==============================
+OOF Score: 0.79731
+successfully saved feature names

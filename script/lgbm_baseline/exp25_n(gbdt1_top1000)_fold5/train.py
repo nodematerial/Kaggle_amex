@@ -248,19 +248,22 @@ class LGBM_baseline():
         if self.CFG['create_oofs']:
             oofs = pd.concat(oofs).reset_index()
             oofs.to_feather(self.output_dir + '/oofs.ftr')
-            self.STDOUT('=' * 30)
-            self.STDOUT('OOFs Info')
-            f, t = oofs['predicted_09'].value_counts()
-            self.STDOUT(f'threshold 0.9  True:{t} False:{f}')
-            f, t = oofs['predicted_08'].value_counts()
-            self.STDOUT(f'threshold 0.8  True:{t} False:{f}')
-            f, t = oofs['predicted_07'].value_counts()
-            self.STDOUT(f'threshold 0.7  True:{t} False:{f}')
-            f, t = oofs['predicted_06'].value_counts()
-            self.STDOUT(f'threshold 0.6  True:{t} False:{f}')
-            f, t = oofs['predicted_05'].value_counts()
-            self.STDOUT(f'threshold 0.5  True:{t} False:{f}')
-            self.STDOUT('=' * 30)
+            try:
+                self.STDOUT('=' * 30)
+                self.STDOUT('OOFs Info')
+                f, t = oofs['predicted_09'].value_counts()
+                self.STDOUT(f'threshold 0.9  True:{t} False:{f}')
+                f, t = oofs['predicted_08'].value_counts()
+                self.STDOUT(f'threshold 0.8  True:{t} False:{f}')
+                f, t = oofs['predicted_07'].value_counts()
+                self.STDOUT(f'threshold 0.7  True:{t} False:{f}')
+                f, t = oofs['predicted_06'].value_counts()
+                self.STDOUT(f'threshold 0.6  True:{t} False:{f}')
+                f, t = oofs['predicted_05'].value_counts()
+                self.STDOUT(f'threshold 0.5  True:{t} False:{f}')
+                self.STDOUT('=' * 30)
+            except:
+                pass
 
         self.STDOUT(f"OOF Score: {np.mean(score_list):.5f}")
 

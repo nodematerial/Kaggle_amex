@@ -23,7 +23,7 @@ create_oofs : True
 
 # params
 training_params : {
-  dart2 objective : binary,
+  objective : binary,
   metric : custom,
   n_estimators : 10000,
   early_stopping_round : 3000,
