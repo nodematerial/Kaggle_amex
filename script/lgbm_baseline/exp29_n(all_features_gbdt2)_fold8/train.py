@@ -204,7 +204,7 @@ class LGBM_baseline():
         eval_interval = self.CFG['eval_interval']
         only_first_fold = self.CFG['only_first_fold']
         score_list = []
-        kf = StratifiedKFold(n_splits=5)
+        kf = StratifiedKFold(n_splits=8)
         oofs = []
         for fold, (idx_tr, idx_va) in enumerate(kf.split(self.train, self.target)):
             train_x = self.train.iloc[idx_tr][self.features]

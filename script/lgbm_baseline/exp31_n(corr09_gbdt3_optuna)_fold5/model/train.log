@@ -1,0 +1,223 @@
+dataframe_info:  458913 rows, 2556 features
+[Optuna parameter tuning]
+[ Trial 0 Start ]
+CV Score | 01:20 | Score = 0.79409
+[ Trial 1 Start ]
+CV Score | 01:43 | Score = 0.79131
+[ Trial 2 Start ]
+CV Score | 01:19 | Score = 0.79319
+[ Trial 3 Start ]
+CV Score | 01:04 | Score = 0.79193
+[ Trial 4 Start ]
+CV Score | 01:03 | Score = 0.79371
+[ Trial 5 Start ]
+CV Score | 02:14 | Score = 0.79469
+[ Trial 6 Start ]
+CV Score | 01:41 | Score = 0.79318
+[ Trial 7 Start ]
+CV Score | 01:21 | Score = 0.79260
+[ Trial 8 Start ]
+CV Score | 01:05 | Score = 0.79505
+[ Trial 9 Start ]
+CV Score | 01:08 | Score = 0.79120
+[ Trial 10 Start ]
+CV Score | 00:56 | Score = 0.79256
+[ Trial 11 Start ]
+CV Score | 01:31 | Score = 0.79428
+[ Trial 12 Start ]
+CV Score | 01:24 | Score = 0.79386
+[ Trial 13 Start ]
+CV Score | 01:01 | Score = 0.79307
+[ Trial 14 Start ]
+CV Score | 01:28 | Score = 0.79365
+[ Trial 15 Start ]
+CV Score | 01:08 | Score = 0.79415
+[ Trial 16 Start ]
+CV Score | 01:35 | Score = 0.79368
+[ Trial 17 Start ]
+CV Score | 01:09 | Score = 0.79454
+[ Trial 18 Start ]
+CV Score | 01:25 | Score = 0.79354
+[ Trial 19 Start ]
+CV Score | 01:15 | Score = 0.79343
+[ Trial 20 Start ]
+CV Score | 01:24 | Score = 0.79404
+[ Trial 21 Start ]
+CV Score | 01:04 | Score = 0.79303
+[ Trial 22 Start ]
+CV Score | 01:16 | Score = 0.79462
+[ Trial 23 Start ]
+CV Score | 01:09 | Score = 0.79446
+[ Trial 24 Start ]
+CV Score | 01:06 | Score = 0.79413
+[ Trial 25 Start ]
+CV Score | 01:29 | Score = 0.79373
+[ Trial 26 Start ]
+CV Score | 01:08 | Score = 0.79327
+[ Trial 27 Start ]
+CV Score | 01:07 | Score = 0.79352
+[ Trial 28 Start ]
+CV Score | 01:23 | Score = 0.79444
+[ Trial 29 Start ]
+CV Score | 01:01 | Score = 0.79144
+[ Trial 30 Start ]
+CV Score | 01:41 | Score = 0.79408
+[ Trial 31 Start ]
+CV Score | 01:09 | Score = 0.79347
+[ Trial 32 Start ]
+CV Score | 01:01 | Score = 0.79496
+[ Trial 33 Start ]
+CV Score | 01:08 | Score = 0.79419
+[ Trial 34 Start ]
+CV Score | 01:27 | Score = 0.79486
+[ Trial 35 Start ]
+CV Score | 01:02 | Score = 0.79361
+[ Trial 36 Start ]
+CV Score | 00:56 | Score = 0.79359
+[ Trial 37 Start ]
+CV Score | 01:18 | Score = 0.79343
+[ Trial 38 Start ]
+CV Score | 00:45 | Score = 0.79007
+[ Trial 39 Start ]
+CV Score | 01:24 | Score = 0.79236
+[ Trial 40 Start ]
+CV Score | 01:07 | Score = 0.79231
+[ Trial 41 Start ]
+CV Score | 00:56 | Score = 0.79330
+[ Trial 42 Start ]
+CV Score | 00:58 | Score = 0.79150
+[ Trial 43 Start ]
+CV Score | 01:01 | Score = 0.79456
+[ Trial 44 Start ]
+CV Score | 01:42 | Score = 0.79437
+[ Trial 45 Start ]
+CV Score | 01:10 | Score = 0.79367
+[ Trial 46 Start ]
+CV Score | 00:57 | Score = 0.79442
+[ Trial 47 Start ]
+CV Score | 01:15 | Score = 0.79275
+[ Trial 48 Start ]
+CV Score | 01:25 | Score = 0.79393
+[ Trial 49 Start ]
+CV Score | 00:58 | Score = 0.79301
+[ Trial 50 Start ]
+CV Score | 01:07 | Score = 0.79505
+[ Trial 51 Start ]
+CV Score | 00:56 | Score = 0.79296
+[ Trial 52 Start ]
+CV Score | 01:32 | Score = 0.79306
+[ Trial 53 Start ]
+CV Score | 00:59 | Score = 0.79398
+[ Trial 54 Start ]
+CV Score | 00:59 | Score = 0.79454
+[ Trial 55 Start ]
+CV Score | 01:05 | Score = 0.79301
+[ Trial 56 Start ]
+CV Score | 01:01 | Score = 0.79423
+[ Trial 57 Start ]
+CV Score | 01:08 | Score = 0.79543
+[ Trial 58 Start ]
+CV Score | 01:13 | Score = 0.79464
+[ Trial 59 Start ]
+CV Score | 01:11 | Score = 0.79443
+[ Trial 60 Start ]
+CV Score | 00:55 | Score = 0.79405
+[ Trial 61 Start ]
+CV Score | 00:59 | Score = 0.79337
+[ Trial 62 Start ]
+CV Score | 01:01 | Score = 0.79499
+[ Trial 63 Start ]
+CV Score | 01:18 | Score = 0.79404
+[ Trial 64 Start ]
+CV Score | 01:08 | Score = 0.79460
+[ Trial 65 Start ]
+CV Score | 00:50 | Score = 0.79323
+[ Trial 66 Start ]
+CV Score | 01:03 | Score = 0.79342
+[ Trial 67 Start ]
+CV Score | 01:13 | Score = 0.79305
+[ Trial 68 Start ]
+CV Score | 00:57 | Score = 0.79390
+[ Trial 69 Start ]
+CV Score | 00:58 | Score = 0.79339
+[ Trial 70 Start ]
+CV Score | 01:05 | Score = 0.79446
+[ Trial 71 Start ]
+CV Score | 00:53 | Score = 0.79214
+[ Trial 72 Start ]
+CV Score | 02:19 | Score = 0.79595
+[ Trial 73 Start ]
+CV Score | 01:16 | Score = 0.79474
+[ Trial 74 Start ]
+CV Score | 01:17 | Score = 0.79221
+[ Trial 75 Start ]
+CV Score | 01:38 | Score = 0.79534
+[ Trial 76 Start ]
+CV Score | 01:25 | Score = 0.79312
+[ Trial 77 Start ]
+CV Score | 01:24 | Score = 0.79302
+[ Trial 78 Start ]
+CV Score | 01:40 | Score = 0.79360
+[ Trial 79 Start ]
+CV Score | 01:39 | Score = 0.79385
+[ Trial 80 Start ]
+CV Score | 01:04 | Score = 0.79321
+[ Trial 81 Start ]
+CV Score | 01:33 | Score = 0.79389
+[ Trial 82 Start ]
+CV Score | 01:42 | Score = 0.79433
+[ Trial 83 Start ]
+CV Score | 01:30 | Score = 0.79357
+[ Trial 84 Start ]
+CV Score | 01:37 | Score = 0.79289
+[ Trial 85 Start ]
+CV Score | 01:15 | Score = 0.79371
+[ Trial 86 Start ]
+CV Score | 01:30 | Score = 0.79404
+[ Trial 87 Start ]
+CV Score | 01:13 | Score = 0.79375
+[ Trial 88 Start ]
+CV Score | 01:42 | Score = 0.79380
+[ Trial 89 Start ]
+CV Score | 01:06 | Score = 0.79378
+[ Trial 90 Start ]
+CV Score | 01:13 | Score = 0.79295
+[ Trial 91 Start ]
+CV Score | 01:21 | Score = 0.79406
+[ Trial 92 Start ]
+CV Score | 01:15 | Score = 0.79290
+[ Trial 93 Start ]
+CV Score | 01:26 | Score = 0.79417
+[ Trial 94 Start ]
+CV Score | 01:32 | Score = 0.79514
+[ Trial 95 Start ]
+CV Score | 01:36 | Score = 0.79406
+[ Trial 96 Start ]
+CV Score | 01:22 | Score = 0.79429
+[ Trial 97 Start ]
+CV Score | 01:35 | Score = 0.79337
+[ Trial 98 Start ]
+CV Score | 01:00 | Score = 0.79401
+[ Trial 99 Start ]
+CV Score | 01:16 | Score = 0.79274
+{'lambda_l1': 5.530783077281508, 'lambda_l2': 3.8399100300880626e-07, 'num_leaves': 151, 'feature_fraction': 0.35281583356689555, 'max_depth': 5, 'min_child_samples': 1691}
+[ TRAINING PARAMS ]
+params are gained from OPTUNA
+==============================
+objective : binary
+metric : custom
+n_estimators : 10000
+early_stopping_round : 3000
+seed : 42
+boosting : gbdt
+learning_rate : 0.01
+min_child_samples : 1691
+num_leaves : 151
+force_col_wise : True
+lambda_l1 : 5.530783077281508
+lambda_l2 : 3.8399100300880626e-07
+feature_fraction : 0.35281583356689555
+bagging_fraction : 0.7020538631408108
+bagging_freq : 3
+max_depth : 5
+==============================

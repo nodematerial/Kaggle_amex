@@ -44,5 +44,5 @@ training_params : {
 # Feature selection settings
 # value に allと設定した場合、全ての特徴量が使用される
 using_features : {
-  all_features : importance_top1000,
+  all_features : corr09
 }

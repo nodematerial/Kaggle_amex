@@ -1,0 +1,70 @@
+dataframe_info:  458913 rows, 5326 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : custom
+n_estimators : 10000
+early_stopping_round : 3000
+seed : 42
+boosting : gbdt
+learning_rate : 0.01
+min_child_samples : 770
+num_leaves : 239
+force_col_wise : True
+lambda_l1 : 3.5391459390281754e-07
+lambda_l2 : 1.7098027220214944e-05
+feature_fraction : 0.1235833171955347
+bagging_fraction : 0.7020538631408108
+bagging_freq : 3
+max_depth : 7
+==============================
+==============================
+OOFs Info
+threshold 0.9  True:49615 False:409298
+threshold 0.8  True:72736 False:386177
+threshold 0.7  True:89894 False:369019
+threshold 0.6  True:104505 False:354408
+threshold 0.5  True:118011 False:340902
+==============================
+OOF Score: 0.79862
+successfully saved feature names
+dataframe_info:  458913 rows, 2556 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : custom
+n_estimators : 10000
+early_stopping_round : 3000
+seed : 42
+boosting : gbdt
+learning_rate : 0.01
+min_child_samples : 770
+num_leaves : 239
+force_col_wise : True
+lambda_l1 : 3.5391459390281754e-07
+lambda_l2 : 1.7098027220214944e-05
+feature_fraction : 0.1235833171955347
+bagging_fraction : 0.7020538631408108
+bagging_freq : 3
+max_depth : 7
+==============================
+dataframe_info:  458913 rows, 2556 features
+[ TRAINING PARAMS ]
+==============================
+objective : binary
+metric : custom
+n_estimators : 10000
+early_stopping_round : 3000
+seed : 42
+boosting : gbdt
+learning_rate : 0.01
+min_child_samples : 770
+num_leaves : 239
+force_col_wise : True
+lambda_l1 : 3.5391459390281754e-07
+lambda_l2 : 1.7098027220214944e-05
+feature_fraction : 0.1235833171955347
+bagging_fraction : 0.7020538631408108
+bagging_freq : 3
+max_depth : 7
+==============================
