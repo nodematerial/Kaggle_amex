@@ -45,6 +45,7 @@ def amex_metric(y_true: np.array, y_pred: np.array) -> float:
 
     return 0.5 * (g + d)
 
+
 def custom_accuracy(preds, data):
     y_true = data.get_label()
     acc = amex_metric(y_true, preds)
@@ -52,7 +53,7 @@ def custom_accuracy(preds, data):
 
 
 class LGBM_baseline():
-    def __init__(self, CFG, logger = None) -> None:
+    def __init__(self, CFG, logger=None) -> None:
         self.STDOUT = set_STDOUT(logger)
         self.CFG = CFG
         self.features_path = CFG['features_path']
@@ -81,7 +82,7 @@ class LGBM_baseline():
 
     def save_features(self) -> None:
         features_dict = {}
-        
+
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
@@ -109,7 +110,7 @@ class LGBM_baseline():
         for dirname, feature_name in self.using_features.items():
             if feature_name == 'all':
                 feature_name = glob.glob(self.features_path + f'/{dirname}/train/*')
-                feature_name = [os.path.splitext(os.path.basename(F))[0] 
+                feature_name = [os.path.splitext(os.path.basename(F))[0]
                                 for F in feature_name if 'customer_ID' not in F]
 
             elif type(feature_name) == str:
@@ -163,7 +164,7 @@ class LGBM_baseline():
                 dvalid = lgb.Dataset(valid_x, label=valid_y)
 
                 param = {
-                    'objective': 'binary', 
+                    'objective': 'binary',
                     'metric': 'custom',
                     'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
                     'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
@@ -177,8 +178,8 @@ class LGBM_baseline():
                     'force_col_wise': True,
                     'boosting' : boosting_type
                 }
-        
-                gbm = lgb.train(param, dtrain, valid_sets=[dvalid], 
+
+                gbm = lgb.train(param, dtrain, valid_sets=[dvalid],
                                 num_boost_round=num_boost_round,
                                 early_stopping_rounds=early_stopping,
                                 verbose_eval=False,
@@ -214,7 +215,7 @@ class LGBM_baseline():
             dtrain = lgb.Dataset(train_x.drop(columns = 'customer_ID'), label=train_y)
             dvalid = lgb.Dataset(valid_x.drop(columns = 'customer_ID'), label=valid_y)
 
-            gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid], 
+            gbm = lgb.train(self.best_params, dtrain, valid_sets=[dvalid],
                             callbacks=[lgb.log_evaluation(eval_interval)],
                             feval = [custom_accuracy])
 
@@ -238,12 +239,12 @@ class LGBM_baseline():
             oofs.append(oof)
 
             if self.CFG['show_importance']:
-                importance = pd.DataFrame(gbm.feature_importance(), index=self.features[1:], 
+                importance = pd.DataFrame(gbm.feature_importance(), index=self.features[1:],
                                           columns=['importance']).sort_values('importance',ascending=False)
-                importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')           
+                importance.to_csv(self.output_dir + f'/importance_fold{fold}.csv')
 
-            if only_first_fold: break 
-        
+            if only_first_fold: break
+
         # saving oofs
         if self.CFG['create_oofs']:
             oofs = pd.concat(oofs).reset_index()

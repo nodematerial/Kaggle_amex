@@ -1,8 +1,8 @@
-import pandas as pd 
+import pandas as pd
 import yaml
 import glob
 import os
-import pickle 
+import pickle
 import lightgbm as lgb
 
 def init_logger(log_file='train.log'):
@@ -23,9 +23,9 @@ def set_STDOUT(logger):
         return print
     else:
         return logger.info
-    
-    
-    
+
+
+
 class DartEarlyStopping(object):
     """DartEarlyStopping"""
 
@@ -56,7 +56,7 @@ class DartEarlyStopping(object):
                 if env.iteration - self.best_iter > self.stopping_round:
                     # 終了させる
                     eval_result_str = '\t'.join([lgb.callback._format_eval_result(x) for x in self.best_score_list])
-                    lgb.basic._log_info(f"Early stopping, best iteration is:\n[{self.best_iter+1}]\t{eval_result_str}") 
+                    lgb.basic._log_info(f"Early stopping, best iteration is:\n[{self.best_iter+1}]\t{eval_result_str}")
                     lgb.basic._log_info(f"You can get best model by \"DartEarlyStopping.best_model\"")
                     raise lgb.callback.EarlyStopException(self.best_iter, self.best_score_list)
                 return
